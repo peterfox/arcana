@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace PeterFox\Arcana\Tests\Unit;
 
-use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use PeterFox\Arcana\CompositePreprocessor;
 use PeterFox\Arcana\Contract\SkillPreprocessorInterface;
 use PeterFox\Arcana\NullPreprocessor;
 use PeterFox\Arcana\Skill;
 use PeterFox\Arcana\SkillMetadata;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
 
 #[CoversClass(CompositePreprocessor::class)]
 #[CoversClass(NullPreprocessor::class)]
@@ -129,7 +129,7 @@ final class CompositePreprocessorTest extends TestCase
     }
 
     /**
-     * @param  list<string>  $log
+     * @param list<string> $log
      */
     private function makeTrackingPreprocessor(string $label, array &$log): SkillPreprocessorInterface
     {

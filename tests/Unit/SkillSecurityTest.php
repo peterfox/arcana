@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace PeterFox\Arcana\Tests\Unit;
 
-use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use PeterFox\Arcana\Arcana;
 use PeterFox\Arcana\Exception\SecurityException;
 use PeterFox\Arcana\Exception\ValidationException;
@@ -15,6 +11,10 @@ use PeterFox\Arcana\Skill;
 use PeterFox\Arcana\SkillLibrary;
 use PeterFox\Arcana\SkillMetadata;
 use PeterFox\Arcana\SkillResource;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Security-focused tests covering path traversal protection and input validation.
@@ -101,7 +101,7 @@ final class SkillSecurityTest extends TestCase
     public function it_throws_for_unknown_resource_name(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessageMatches("/is not declared/");
+        $this->expectExceptionMessageMatches('/is not declared/');
 
         $skill = $this->library->loadSkill('example-skill');
         $skill->loadResource('resource-that-does-not-exist');

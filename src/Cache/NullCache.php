@@ -44,7 +44,7 @@ final class NullCache implements CacheInterface
     }
 
     /**
-     * @param  iterable<string, mixed>  $values
+     * @param iterable<string, mixed> $values
      */
     public function setMultiple(iterable $values, \DateInterval|int|null $ttl = null): bool
     {

@@ -76,18 +76,20 @@ final class ShowSkillCommand extends Command
         }
 
         if ($m->tags !== []) {
-            $this->line("  <comment>Tags:</comment>     " . implode(', ', $m->tags));
+            $this->line('  <comment>Tags:</comment>     ' . implode(', ', $m->tags));
         }
 
         if ($m->triggers !== []) {
-            $this->line("  <comment>Triggers:</comment>");
+            $this->line('  <comment>Triggers:</comment>');
+
             foreach ($m->triggers as $trigger) {
                 $this->line("    - {$trigger}");
             }
         }
 
         if ($m->resources !== []) {
-            $this->line("  <comment>Resources:</comment>");
+            $this->line('  <comment>Resources:</comment>');
+
             foreach ($m->resources as $resource) {
                 $desc = $resource->description !== '' ? " — {$resource->description}" : '';
                 $this->line("    - {$resource->name}{$desc}");
@@ -95,7 +97,8 @@ final class ShowSkillCommand extends Command
         }
 
         if ($m->references !== []) {
-            $this->line("  <comment>References:</comment>");
+            $this->line('  <comment>References:</comment>');
+
             foreach ($m->references as $ref) {
                 $this->line("    - {$ref->title}: {$ref->url}");
             }

@@ -16,7 +16,6 @@ use PeterFox\Arcana\Contract\SkillLibraryInterface;
  * @example With Instructor PHP
  *   $tool = new LoadSkillTool($library);
  *   // Pass $tool as a callable to Instructor
- *
  * @example Direct invocation
  *   $body = ($tool)('web-search');
  *   $body = ($tool)('web-search', includeResources: false);
@@ -30,9 +29,10 @@ final class LoadSkillTool
     /**
      * Load the full content of a skill by its exact name.
      *
-     * @param  string  $name             Exact skill name (as returned by list_skills).
-     * @param  bool    $includeResources Whether to append bundled resource files.
-     * @return string  Full Markdown content of the skill.
+     * @param string $name Exact skill name (as returned by list_skills).
+     * @param bool $includeResources Whether to append bundled resource files.
+     *
+     * @return string Full Markdown content of the skill.
      */
     public function __invoke(string $name, bool $includeResources = true): string
     {

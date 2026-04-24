@@ -17,7 +17,6 @@ use PeterFox\Arcana\SkillMetadata;
  * @example With Instructor PHP
  *   $tool = new ListSkillsTool($library);
  *   // Pass $tool as a callable to Instructor
- *
  * @example Direct invocation
  *   $json = ($tool)('search');  // filtered
  *   $json = ($tool)();          // all skills
@@ -31,8 +30,9 @@ final class ListSkillsTool
     /**
      * List available skills, optionally filtered by a search term.
      *
-     * @param  string|null  $filter  Case-insensitive search term.
-     * @return string  JSON-encoded skill list.
+     * @param string|null $filter Case-insensitive search term.
+     *
+     * @return string JSON-encoded skill list.
      */
     public function __invoke(?string $filter = null): string
     {
@@ -48,7 +48,7 @@ final class ListSkillsTool
                     'tags' => $m->tags,
                     'triggers' => $m->triggers,
                 ],
-                $skills
+                $skills,
             ),
         ], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
     }

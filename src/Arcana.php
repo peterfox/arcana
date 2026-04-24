@@ -20,13 +20,11 @@ use Psr\SimpleCache\CacheInterface;
  *   $library = Arcana::create('/path/to/skills');
  *   $skills  = $library->listSkills();
  *   $skill   = $library->loadSkill('web-search');
- *
  * @example With PSR-16 cache
  *   $library = Arcana::create(
  *       directories: ['/skills', '/vendor/skills'],
  *       cache: new RedisCache($redis),
  *   );
- *
  * @example With tool dispatch
  *   $tool   = Arcana::tool($library);
  *   $result = $tool->dispatch('list_skills', []);
@@ -39,11 +37,11 @@ final class Arcana
     /**
      * Create a new SkillLibrary instance.
      *
-     * @param  string|array<string>            $directories  One or more directories containing SKILL.md files.
-     * @param  CacheInterface|null             $cache        Optional PSR-16 cache. Defaults to NullCache.
-     * @param  SkillPreprocessorInterface|null $preprocessor Optional preprocessor pipeline.
-     * @param  int                             $cacheTtl     Cache TTL in seconds (default: 3600).
-     * @param  string                          $cachePrefix  Cache key prefix (default: 'arcana.').
+     * @param string|array<string> $directories One or more directories containing SKILL.md files.
+     * @param CacheInterface|null $cache Optional PSR-16 cache. Defaults to NullCache.
+     * @param SkillPreprocessorInterface|null $preprocessor Optional preprocessor pipeline.
+     * @param int $cacheTtl Cache TTL in seconds (default: 3600).
+     * @param string $cachePrefix Cache key prefix (default: 'arcana.').
      */
     public static function create(
         string|array $directories,

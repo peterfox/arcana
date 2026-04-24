@@ -46,16 +46,16 @@ final class LoadSkillTool
 
         if (!class_exists($toolClass)) {
             throw new \LogicException(
-                'prism-php/prism is required to use Arcana\'s Laravel tools. ' .
-                'Run: composer require prism-php/prism'
+                'prism-php/prism is required to use Arcana\'s Laravel tools. '
+                . 'Run: composer require prism-php/prism',
             );
         }
 
         return $toolClass::as('load_skill')
             ->for(
-                'Load the complete Markdown content of a specific agent skill by its exact name. ' .
-                'Returns the full skill instructions and any bundled reference documentation. ' .
-                'Only call this after using list_skills to identify the correct skill name.'
+                'Load the complete Markdown content of a specific agent skill by its exact name. '
+                . 'Returns the full skill instructions and any bundled reference documentation. '
+                . 'Only call this after using list_skills to identify the correct skill name.',
             )
             ->withStringParameter(
                 name: 'name',

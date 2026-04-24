@@ -38,8 +38,8 @@ final class SkillParser
     /**
      * Parse the full contents of a SKILL.md file.
      *
-     * @param  string  $content   Raw file contents.
-     * @param  string  $filePath  Absolute path to the source file (used for error context).
+     * @param string $content Raw file contents.
+     * @param string $filePath Absolute path to the source file (used for error context).
      *
      * @throws SkillParseException
      */
@@ -75,8 +75,9 @@ final class SkillParser
     // -------------------------------------------------------------------------
 
     /**
-     * @return array{0: array<string, mixed>, 1: string}
      * @throws SkillParseException
+     *
+     * @return array{0: array<string, mixed>, 1: string}
      */
     private function splitContent(string $content, string $filePath): array
     {
@@ -108,7 +109,8 @@ final class SkillParser
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
+     *
      * @throws SkillParseException
      */
     private function buildMetadata(array $data, string $filePath): SkillMetadata
@@ -133,7 +135,8 @@ final class SkillParser
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
+     *
      * @throws SkillParseException
      */
     private function requireString(array $data, string $key, string $filePath): string
@@ -149,9 +152,11 @@ final class SkillParser
     }
 
     /**
-     * @param  array<string, mixed>  $data
-     * @return array<string>
+     * @param array<string, mixed> $data
+     *
      * @throws SkillParseException
+     *
+     * @return array<string>
      */
     private function parseStringArray(array $data, string $key, string $filePath): array
     {
@@ -170,14 +175,16 @@ final class SkillParser
             array_filter(
                 array_map(fn(mixed $v) => is_scalar($v) ? (string) $v : '', $data[$key]),
                 fn(string $v) => $v !== '',
-            )
+            ),
         );
     }
 
     /**
-     * @param  mixed  $raw
-     * @return array<SkillResource>
+     * @param mixed $raw
+     *
      * @throws SkillParseException
+     *
+     * @return array<SkillResource>
      */
     private function parseResources(mixed $raw, string $filePath): array
     {
@@ -203,9 +210,11 @@ final class SkillParser
     }
 
     /**
-     * @param  mixed  $raw
-     * @return array<SkillScript>
+     * @param mixed $raw
+     *
      * @throws SkillParseException
+     *
+     * @return array<SkillScript>
      */
     private function parseScripts(mixed $raw, string $filePath): array
     {
@@ -232,7 +241,8 @@ final class SkillParser
     }
 
     /**
-     * @param  mixed  $raw
+     * @param mixed $raw
+     *
      * @return array<SkillReference>
      */
     private function parseReferences(mixed $raw, string $filePath): array
@@ -264,15 +274,15 @@ final class SkillParser
     {
         if ($name === '' || strlen($name) > 64) {
             throw new SkillParseException(
-                message: "Skill name must be 1–64 characters, got " . strlen($name) . ".",
+                message: 'Skill name must be 1–64 characters, got ' . strlen($name) . '.',
                 filePath: $filePath,
             );
         }
 
         if (!preg_match('/^[a-z][a-z0-9\-]*$/', $name)) {
             throw new SkillParseException(
-                message: "Invalid skill name '{$name}'. Names must start with a lowercase letter " .
-                         "and contain only lowercase letters (a–z), digits (0–9), and hyphens (-).",
+                message: "Invalid skill name '{$name}'. Names must start with a lowercase letter "
+                         . 'and contain only lowercase letters (a–z), digits (0–9), and hyphens (-).',
                 filePath: $filePath,
             );
         }

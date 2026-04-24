@@ -24,8 +24,9 @@
         "symfony/yaml": "^7.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^11.0",
+        "laravel/pint": "^1.29",
         "phpstan/phpstan": "^1.12",
+        "phpunit/phpunit": "^11.0",
         "psalm/phar": "^5.26"
     },
     "suggest": {
@@ -56,7 +57,10 @@
         "test": "phpunit --no-coverage",
         "test:coverage": "phpunit",
         "analyse": "phpstan analyse --no-progress",
+        "lint": "pint",
+        "lint:check": "pint --test",
         "check": [
+            "@lint:check",
             "@analyse",
             "@test"
         ]
@@ -65,7 +69,9 @@
         "test": "Run the PHPUnit test suite",
         "test:coverage": "Run tests with code coverage report",
         "analyse": "Run PHPStan static analysis (level 8)",
-        "check": "Run static analysis then tests"
+        "lint": "Fix code style with Laravel Pint",
+        "lint:check": "Check code style without making changes (CI-safe)",
+        "check": "Check style, run static analysis, then run tests"
     },
     "config": {
         "sort-packages": true,

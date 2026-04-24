@@ -26,7 +26,7 @@ final class CompositePreprocessor implements SkillPreprocessorInterface
     private readonly array $preprocessors;
 
     /**
-     * @param  array<SkillPreprocessorInterface>  $preprocessors  Ordered list of preprocessors to apply.
+     * @param array<SkillPreprocessorInterface> $preprocessors Ordered list of preprocessors to apply.
      */
     public function __construct(array $preprocessors)
     {

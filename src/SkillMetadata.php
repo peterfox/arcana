@@ -15,12 +15,12 @@ namespace PeterFox\Arcana;
 final class SkillMetadata
 {
     /**
-     * @param  array<string>          $tags        Categorical tags for discovery.
-     * @param  array<string>          $triggers    Natural-language phrases that indicate this skill is relevant.
-     * @param  array<SkillResource>   $resources   Supplementary file resources bundled with the skill.
-     * @param  array<SkillScript>     $scripts     Executable scripts for dynamic context injection.
-     * @param  array<SkillReference>  $references  External reference links.
-     * @param  string                 $filePath    Absolute path to the SKILL.md file on disk.
+     * @param array<string> $tags Categorical tags for discovery.
+     * @param array<string> $triggers Natural-language phrases that indicate this skill is relevant.
+     * @param array<SkillResource> $resources Supplementary file resources bundled with the skill.
+     * @param array<SkillScript> $scripts Executable scripts for dynamic context injection.
+     * @param array<SkillReference> $references External reference links.
+     * @param string $filePath Absolute path to the SKILL.md file on disk.
      */
     public function __construct(
         public readonly string $name,

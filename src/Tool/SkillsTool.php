@@ -51,7 +51,7 @@ final class SkillsTool
     /**
      * Return a JSON-encoded list of available skills.
      *
-     * @param  string|null  $filter  Optional case-insensitive search term.
+     * @param string|null $filter Optional case-insensitive search term.
      */
     public function listSkills(?string $filter = null): string
     {
@@ -61,8 +61,8 @@ final class SkillsTool
     /**
      * Return the full Markdown content of a named skill.
      *
-     * @param  string  $name             Exact skill name.
-     * @param  bool    $includeResources Whether to append bundled resources.
+     * @param string $name Exact skill name.
+     * @param bool $includeResources Whether to append bundled resources.
      */
     public function loadSkill(string $name, bool $includeResources = true): string
     {
@@ -76,11 +76,12 @@ final class SkillsTool
     /**
      * Route an LLM tool call to the correct handler.
      *
-     * @param  string               $function   The function name (list_skills | load_skill).
-     * @param  array<string, mixed> $arguments  Decoded tool call arguments.
-     * @return string               Tool result as a string (to be sent back to the model).
+     * @param string $function The function name (list_skills | load_skill).
+     * @param array<string, mixed> $arguments Decoded tool call arguments.
      *
      * @throws \InvalidArgumentException When an unknown function name is given.
+     *
+     * @return string Tool result as a string (to be sent back to the model).
      */
     public function dispatch(string $function, array $arguments): string
     {
@@ -97,7 +98,7 @@ final class SkillsTool
                     : true,
             ),
             default => throw new \InvalidArgumentException(
-                "Unknown tool function '{$function}'. Available: list_skills, load_skill."
+                "Unknown tool function '{$function}'. Available: list_skills, load_skill.",
             ),
         };
     }
@@ -181,7 +182,7 @@ final class SkillsTool
                 'description' => $def['function']['description'],
                 'input_schema' => $def['function']['parameters'],
             ],
-            $this->definitions()
+            $this->definitions(),
         );
     }
 }

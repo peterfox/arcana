@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace PeterFox\Arcana;
 
 use PeterFox\Arcana\Exception\SecurityException;
-use PeterFox\Arcana\Exception\SkillNotFoundException;
 
 /**
  * Immutable value object representing a fully-loaded AI agent skill.
@@ -67,8 +66,8 @@ final class Skill
      * within the skill's own directory.
      *
      * @throws \InvalidArgumentException When the resource name is unknown.
-     * @throws SecurityException         When the resolved path escapes the skill directory.
-     * @throws \RuntimeException         When the file cannot be read.
+     * @throws SecurityException When the resolved path escapes the skill directory.
+     * @throws \RuntimeException When the file cannot be read.
      */
     public function loadResource(string $name): string
     {
@@ -83,7 +82,7 @@ final class Skill
 
         if ($resource === null) {
             throw new \InvalidArgumentException(
-                "Resource '{$name}' is not declared in skill '{$this->metadata->name}'."
+                "Resource '{$name}' is not declared in skill '{$this->metadata->name}'.",
             );
         }
 
@@ -92,16 +91,16 @@ final class Skill
         // Guard 1 — reject absolute paths before any filesystem access.
         if ($rawRelative !== '' && ($rawRelative[0] === '/' || $rawRelative[0] === '\\')) {
             throw new SecurityException(
-                "Absolute resource paths are not permitted. " .
-                "Resource '{$name}' declared path: '{$rawRelative}'."
+                'Absolute resource paths are not permitted. '
+                . "Resource '{$name}' declared path: '{$rawRelative}'.",
             );
         }
 
         // Guard 2 — reject explicit traversal sequences.
         if (str_contains($rawRelative, '..')) {
             throw new SecurityException(
-                "Path traversal sequences ('..') are not permitted in resource paths. " .
-                "Resource '{$name}' declared path: '{$rawRelative}'."
+                "Path traversal sequences ('..') are not permitted in resource paths. "
+                . "Resource '{$name}' declared path: '{$rawRelative}'.",
             );
         }
 
@@ -110,7 +109,7 @@ final class Skill
 
         if ($resolvedBase === false) {
             throw new SecurityException(
-                "Cannot resolve skill directory: {$skillDir}"
+                "Cannot resolve skill directory: {$skillDir}",
             );
         }
 
@@ -119,7 +118,7 @@ final class Skill
 
         if ($resolvedPath === false) {
             throw new \RuntimeException(
-                "Resource file not found: {$rawPath}"
+                "Resource file not found: {$rawPath}",
             );
         }
 
@@ -127,8 +126,8 @@ final class Skill
         // must still be within the skill directory.
         if (!str_starts_with($resolvedPath . DIRECTORY_SEPARATOR, $resolvedBase . DIRECTORY_SEPARATOR)) {
             throw new SecurityException(
-                "Path traversal detected: resource '{$name}' resolved to '{$resolvedPath}', " .
-                "which is outside the skill directory '{$resolvedBase}'."
+                "Path traversal detected: resource '{$name}' resolved to '{$resolvedPath}', "
+                . "which is outside the skill directory '{$resolvedBase}'.",
             );
         }
 

@@ -65,7 +65,7 @@ final class ArcanaServiceProvider extends ServiceProvider
     }
 
     /**
-     * @param  array<string, mixed>  $config
+     * @param array<string, mixed> $config
      */
     private function resolveCache(array $config): CacheInterface
     {
@@ -95,7 +95,7 @@ final class ArcanaServiceProvider extends ServiceProvider
     }
 
     /**
-     * @param  array<string, mixed>  $config
+     * @param array<string, mixed> $config
      */
     private function resolvePreprocessor(array $config): ?SkillPreprocessorInterface
     {

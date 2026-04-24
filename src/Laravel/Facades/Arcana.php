@@ -15,8 +15,8 @@ use PeterFox\Arcana\SkillMetadata;
  * Proxies to the SkillLibraryInterface binding in the container.
  *
  * @method static array<SkillMetadata> listSkills(?string $filter = null)
- * @method static Skill                loadSkill(string $name)
- * @method static bool                 hasSkill(string $name)
+ * @method static Skill loadSkill(string $name)
+ * @method static bool hasSkill(string $name)
  *
  * @see \PeterFox\Arcana\SkillLibrary
  */

@@ -31,9 +31,10 @@ final class ListSkillsCommand extends Command
         $skills = $library->listSkills($filter);
 
         if ($skills === []) {
-            $this->warn($filter
+            $this->warn(
+                $filter
                 ? "No skills matched the filter: \"{$filter}\""
-                : 'No skills found. Check your arcana.directories config.'
+                : 'No skills found. Check your arcana.directories config.',
             );
 
             return self::SUCCESS;
@@ -49,7 +50,7 @@ final class ListSkillsCommand extends Command
                     'tags' => $m->tags,
                     'triggers' => $m->triggers,
                 ], $skills),
-                JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR
+                JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR,
             ));
 
             return self::SUCCESS;

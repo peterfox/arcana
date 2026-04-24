@@ -50,16 +50,16 @@ final class ListSkillsTool
 
         if (!class_exists($toolClass)) {
             throw new \LogicException(
-                'prism-php/prism is required to use Arcana\'s Laravel tools. ' .
-                'Run: composer require prism-php/prism'
+                'prism-php/prism is required to use Arcana\'s Laravel tools. '
+                . 'Run: composer require prism-php/prism',
             );
         }
 
         return $toolClass::as('list_skills')
             ->for(
-                'List all available agent skills with metadata. ' .
-                'Returns a JSON array of skills with their names, descriptions, tags, and trigger phrases. ' .
-                'Call this first to discover what capabilities are available before loading one.'
+                'List all available agent skills with metadata. '
+                . 'Returns a JSON array of skills with their names, descriptions, tags, and trigger phrases. '
+                . 'Call this first to discover what capabilities are available before loading one.',
             )
             ->withStringParameter(
                 name: 'filter',
@@ -78,7 +78,7 @@ final class ListSkillsTool
                             'tags' => $m->tags,
                             'triggers' => $m->triggers,
                         ],
-                        $skills
+                        $skills,
                     ),
                 ], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
             });

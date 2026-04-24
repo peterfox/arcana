@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace PeterFox\Arcana\Tests\Unit;
 
-use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use PeterFox\Arcana\Exception\SkillParseException;
 use PeterFox\Arcana\Skill;
 use PeterFox\Arcana\SkillMetadata;
 use PeterFox\Arcana\SkillParser;
 use PeterFox\Arcana\SkillReference;
 use PeterFox\Arcana\SkillResource;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
 
 #[CoversClass(SkillParser::class)]
 final class SkillParserTest extends TestCase

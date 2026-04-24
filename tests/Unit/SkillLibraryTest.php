@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace PeterFox\Arcana\Tests\Unit;
 
-use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use PeterFox\Arcana\Arcana;
-use PeterFox\Arcana\Exception\SecurityException;
 use PeterFox\Arcana\Exception\SkillNotFoundException;
 use PeterFox\Arcana\Exception\ValidationException;
 use PeterFox\Arcana\Skill;
 use PeterFox\Arcana\SkillLibrary;
 use PeterFox\Arcana\SkillMetadata;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
 
 #[CoversClass(SkillLibrary::class)]
 final class SkillLibraryTest extends TestCase

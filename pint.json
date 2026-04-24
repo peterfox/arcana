@@ -1,0 +1,37 @@
+{
+    "preset": "per",
+    "rules": {
+        "declare_strict_types": true,
+        "final_class": false,
+        "final_public_method_for_abstract_class": false,
+        "ordered_imports": {
+            "sort_algorithm": "alpha",
+            "imports_order": ["class", "function", "const"]
+        },
+        "global_namespace_import": {
+            "import_classes": false,
+            "import_constants": false,
+            "import_functions": false
+        },
+        "no_unused_imports": true,
+        "blank_line_before_statement": {
+            "statements": ["return", "throw", "try", "if", "foreach", "for", "while", "switch"]
+        },
+        "phpdoc_align": {
+            "align": "left"
+        },
+        "phpdoc_order": true,
+        "phpdoc_separation": true,
+        "phpdoc_trim": true,
+        "single_quote": true,
+        "trailing_comma_in_multiline": {
+            "elements": ["arrays", "arguments", "parameters", "match"]
+        },
+        "multiline_whitespace_before_semicolons": {
+            "strategy": "no_multi_line"
+        }
+    },
+    "exclude": [
+        "vendor"
+    ]
+}

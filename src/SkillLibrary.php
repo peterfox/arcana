@@ -8,7 +8,6 @@ use PeterFox\Arcana\Cache\NullCache;
 use PeterFox\Arcana\Contract\SkillLibraryInterface;
 use PeterFox\Arcana\Contract\SkillPreprocessorInterface;
 use PeterFox\Arcana\Exception\ArcanaException;
-use PeterFox\Arcana\Exception\SecurityException;
 use PeterFox\Arcana\Exception\SkillNotFoundException;
 use PeterFox\Arcana\Exception\SkillParseException;
 use PeterFox\Arcana\Exception\ValidationException;
@@ -45,12 +44,12 @@ final class SkillLibrary implements SkillLibraryInterface
     private ?array $metadataIndex = null;
 
     /**
-     * @param  string|array<string>            $directories  One or more directories to scan for SKILL.md files.
-     * @param  CacheInterface                   $cache        PSR-16 cache. Defaults to NullCache (no caching).
-     * @param  SkillPreprocessorInterface|null  $preprocessor Optional preprocessor applied before caching.
-     * @param  int                              $cacheTtl     Cache TTL in seconds (default: 1 hour).
-     * @param  string                           $cachePrefix  Prefix for all cache keys.
-     * @param  SkillParser                      $parser       Parser instance (injectable for testing).
+     * @param string|array<string> $directories One or more directories to scan for SKILL.md files.
+     * @param CacheInterface $cache PSR-16 cache. Defaults to NullCache (no caching).
+     * @param SkillPreprocessorInterface|null $preprocessor Optional preprocessor applied before caching.
+     * @param int $cacheTtl Cache TTL in seconds (default: 1 hour).
+     * @param string $cachePrefix Prefix for all cache keys.
+     * @param SkillParser $parser Parser instance (injectable for testing).
      *
      * @throws ValidationException When a supplied directory does not exist.
      */
@@ -65,7 +64,7 @@ final class SkillLibrary implements SkillLibraryInterface
         $dirs = is_array($directories) ? $directories : [$directories];
 
         $this->directories = array_values(
-            array_map(fn(string $d) => $this->resolveDirectory($d), $dirs)
+            array_map(fn(string $d) => $this->resolveDirectory($d), $dirs),
         );
     }
 
@@ -210,8 +209,9 @@ final class SkillLibrary implements SkillLibraryInterface
     /**
      * Discover all SKILL.md files under a given directory (recursive).
      *
-     * @return array<string> Absolute file paths.
      * @throws ValidationException
+     *
+     * @return array<string> Absolute file paths.
      */
     private function discoverSkillFiles(string $dir): array
     {
@@ -221,9 +221,9 @@ final class SkillLibrary implements SkillLibraryInterface
             $iterator = new \RecursiveIteratorIterator(
                 new \RecursiveDirectoryIterator(
                     $dir,
-                    \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::FOLLOW_SYMLINKS
+                    \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::FOLLOW_SYMLINKS,
                 ),
-                \RecursiveIteratorIterator::LEAVES_ONLY
+                \RecursiveIteratorIterator::LEAVES_ONLY,
             );
 
             /** @var \SplFileInfo $file */
@@ -243,7 +243,8 @@ final class SkillLibrary implements SkillLibraryInterface
     }
 
     /**
-     * @param  array<SkillMetadata>  $skills
+     * @param array<SkillMetadata> $skills
+     *
      * @return array<SkillMetadata>
      */
     private function filterSkills(array $skills, string $filter): array
@@ -271,7 +272,7 @@ final class SkillLibrary implements SkillLibraryInterface
                 }
 
                 return false;
-            })
+            }),
         );
     }
 
@@ -282,14 +283,14 @@ final class SkillLibrary implements SkillLibraryInterface
     {
         if ($name === '' || strlen($name) > 64) {
             throw new ValidationException(
-                "Skill name must be 1–64 characters, got " . strlen($name) . "."
+                'Skill name must be 1–64 characters, got ' . strlen($name) . '.',
             );
         }
 
         if (!preg_match('/^[a-z][a-z0-9\-]*$/', $name)) {
             throw new ValidationException(
-                "Invalid skill name '{$name}'. Names must start with a lowercase letter " .
-                "and contain only lowercase letters (a–z), digits (0–9), and hyphens (-)."
+                "Invalid skill name '{$name}'. Names must start with a lowercase letter "
+                . 'and contain only lowercase letters (a–z), digits (0–9), and hyphens (-).',
             );
         }
     }
@@ -303,7 +304,7 @@ final class SkillLibrary implements SkillLibraryInterface
 
         if ($real === false || !is_dir($real)) {
             throw new ValidationException(
-                "Skill directory not found or is not a directory: '{$dir}'."
+                "Skill directory not found or is not a directory: '{$dir}'.",
             );
         }
 

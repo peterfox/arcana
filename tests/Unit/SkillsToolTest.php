@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace PeterFox\Arcana\Tests\Unit;
 
-use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use PeterFox\Arcana\Arcana;
 use PeterFox\Arcana\Exception\SkillNotFoundException;
 use PeterFox\Arcana\SkillLibrary;
 use PeterFox\Arcana\Tool\ListSkillsTool;
 use PeterFox\Arcana\Tool\LoadSkillTool;
 use PeterFox\Arcana\Tool\SkillsTool;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
 
 #[CoversClass(SkillsTool::class)]
 #[CoversClass(ListSkillsTool::class)]
@@ -59,6 +59,7 @@ final class SkillsToolTest extends TestCase
         $data = json_decode($json, true);
 
         self::assertIsArray($data);
+
         foreach ($data['skills'] as $skill) {
             $haystack = strtolower($skill['name'] . ' ' . $skill['description'] . ' ' . implode(' ', $skill['tags']));
             self::assertStringContainsString('web', $haystack);
