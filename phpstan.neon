@@ -1,0 +1,13 @@
+parameters:
+    level: 8
+    paths:
+        - src
+    excludePaths:
+        # Laravel bridge requires illuminate/support which is a soft dependency.
+        # Applications using the bridge will have their own phpstan config
+        # that includes the Laravel extension.
+        - src/Laravel
+
+    checkMissingIterableValueType: true
+    checkGenericClassInNonGenericObjectType: true
+    reportUnmatchedIgnoredErrors: false
