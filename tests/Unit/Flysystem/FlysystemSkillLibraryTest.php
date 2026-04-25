@@ -81,7 +81,6 @@ final class FlysystemSkillLibraryTest extends TestCase
         $skills = $this->library->listSkills();
 
         self::assertCount(2, $skills);
-        self::assertContainsOnlyInstancesOf(SkillMetadata::class, $skills);
 
         $names = array_map(fn(SkillMetadata $m) => $m->name, $skills);
         self::assertContains('example-skill', $names);

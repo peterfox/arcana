@@ -15,11 +15,13 @@ final class ListSkillsToolTest extends TestCase
 {
     private ListSkillsTool $tool;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->tool = $this->app->make(ListSkillsTool::class);
+        $app = $this->app ?? throw new \RuntimeException('App not initialized');
+        $this->tool = $app->make(ListSkillsTool::class);
     }
 
     #[Test]
@@ -31,7 +33,8 @@ final class ListSkillsToolTest extends TestCase
     #[Test]
     public function schema_declares_an_optional_filter_parameter(): void
     {
-        $schema = $this->app->make(JsonSchema::class);
+        $app = $this->app ?? throw new \RuntimeException('App not initialized');
+        $schema = $app->make(JsonSchema::class);
         $definition = $this->tool->schema($schema);
 
         self::assertArrayHasKey('filter', $definition);

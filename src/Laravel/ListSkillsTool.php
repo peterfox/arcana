@@ -39,6 +39,7 @@ final class ListSkillsTool implements Tool
         private readonly SkillLibraryInterface $library,
     ) {}
 
+    #[\Override]
     public function description(): string
     {
         return 'List all available agent skills with metadata. '
@@ -49,6 +50,7 @@ final class ListSkillsTool implements Tool
     /**
      * @return array<string, mixed>
      */
+    #[\Override]
     public function schema(JsonSchema $schema): array
     {
         return [
@@ -60,6 +62,7 @@ final class ListSkillsTool implements Tool
         ];
     }
 
+    #[\Override]
     public function handle(Request $request): string
     {
         $filter = $request['filter'] ?? null;

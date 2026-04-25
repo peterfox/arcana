@@ -72,11 +72,11 @@
             "@test"
         ],
         "check:ai": [
-            "@lint:check:ai",
+            "@lint:ai",
             "@analyse:ai",
             "@test:ai"
         ],
-        "lint:check:ai": "pint --test --format=agent",
+        "lint:ai": "pint --format=agent",
         "analyse:ai": "phpstan analyse --no-progress --error-format=toon",
         "test:ai": "phpunit --no-coverage --extension \"PeterFox\\PhpUnitToonResultPrinter\\ToonResultPrinterExtension\""
     },

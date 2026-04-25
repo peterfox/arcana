@@ -19,6 +19,7 @@ final class CompositePreprocessorTest extends TestCase
 {
     private Skill $skill;
 
+    #[\Override]
     protected function setUp(): void
     {
         $this->skill = $this->makeSkill('Original body content.');
@@ -140,9 +141,10 @@ final class CompositePreprocessorTest extends TestCase
                 private array &$log,
             ) {}
 
+            #[\Override]
             public function process(Skill $skill): Skill
             {
-                $this->log[] = $this->label;
+                $this->log = array_merge($this->log, [$this->label]);
 
                 return $skill;
             }
@@ -154,6 +156,7 @@ final class CompositePreprocessorTest extends TestCase
         return new class ($suffix) implements SkillPreprocessorInterface {
             public function __construct(private readonly string $suffix) {}
 
+            #[\Override]
             public function process(Skill $skill): Skill
             {
                 return new Skill(

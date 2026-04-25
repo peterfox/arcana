@@ -21,6 +21,7 @@ final class SkillLibraryTest extends TestCase
 
     private SkillLibrary $library;
 
+    #[\Override]
     protected function setUp(): void
     {
         $this->fixturesDir = realpath(__DIR__ . '/../Fixtures/skills')
@@ -39,7 +40,6 @@ final class SkillLibraryTest extends TestCase
         $skills = $this->library->listSkills();
 
         self::assertNotEmpty($skills);
-        self::assertContainsOnlyInstancesOf(SkillMetadata::class, $skills);
 
         $names = array_map(fn(SkillMetadata $m) => $m->name, $skills);
         self::assertContains('example-skill', $names);

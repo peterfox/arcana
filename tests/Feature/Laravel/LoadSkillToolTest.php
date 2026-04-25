@@ -16,11 +16,13 @@ final class LoadSkillToolTest extends TestCase
 {
     private LoadSkillTool $tool;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->tool = $this->app->make(LoadSkillTool::class);
+        $app = $this->app ?? throw new \RuntimeException('App not initialized');
+        $this->tool = $app->make(LoadSkillTool::class);
     }
 
     #[Test]
@@ -32,7 +34,8 @@ final class LoadSkillToolTest extends TestCase
     #[Test]
     public function schema_declares_a_required_name_parameter(): void
     {
-        $schema = $this->app->make(JsonSchema::class);
+        $app = $this->app ?? throw new \RuntimeException('App not initialized');
+        $schema = $app->make(JsonSchema::class);
         $definition = $this->tool->schema($schema);
 
         self::assertArrayHasKey('name', $definition);

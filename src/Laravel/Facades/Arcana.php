@@ -22,6 +22,7 @@ use PeterFox\Arcana\SkillMetadata;
  */
 final class Arcana extends Facade
 {
+    #[\Override]
     protected static function getFacadeAccessor(): string
     {
         return SkillLibraryInterface::class;

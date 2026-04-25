@@ -17,7 +17,8 @@ final class ArcanaServiceProviderTest extends TestCase
     #[Test]
     public function it_binds_skill_library_interface(): void
     {
-        $library = $this->app->make(SkillLibraryInterface::class);
+        $app = $this->app ?? throw new \RuntimeException('App not initialized');
+        $library = $app->make(SkillLibraryInterface::class);
 
         self::assertInstanceOf(SkillLibrary::class, $library);
     }
@@ -25,7 +26,8 @@ final class ArcanaServiceProviderTest extends TestCase
     #[Test]
     public function it_registers_arcana_library_alias(): void
     {
-        $library = $this->app->make('arcana.library');
+        $app = $this->app ?? throw new \RuntimeException('App not initialized');
+        $library = $app->make('arcana.library');
 
         self::assertInstanceOf(SkillLibraryInterface::class, $library);
     }
@@ -33,8 +35,9 @@ final class ArcanaServiceProviderTest extends TestCase
     #[Test]
     public function it_returns_the_same_singleton_instance(): void
     {
-        $first = $this->app->make(SkillLibraryInterface::class);
-        $second = $this->app->make(SkillLibraryInterface::class);
+        $app = $this->app ?? throw new \RuntimeException('App not initialized');
+        $first = $app->make(SkillLibraryInterface::class);
+        $second = $app->make(SkillLibraryInterface::class);
 
         self::assertSame($first, $second);
     }
@@ -42,7 +45,8 @@ final class ArcanaServiceProviderTest extends TestCase
     #[Test]
     public function it_merges_default_config(): void
     {
-        $config = $this->app['config']['arcana'];
+        $app = $this->app ?? throw new \RuntimeException('App not initialized');
+        $config = $app['config']['arcana'];
 
         self::assertIsArray($config);
         self::assertArrayHasKey('directories', $config);
@@ -53,7 +57,8 @@ final class ArcanaServiceProviderTest extends TestCase
     #[Test]
     public function it_uses_the_configured_skill_directory(): void
     {
-        $library = $this->app->make(SkillLibraryInterface::class);
+        $app = $this->app ?? throw new \RuntimeException('App not initialized');
+        $library = $app->make(SkillLibraryInterface::class);
         $skills = $library->listSkills();
 
         self::assertNotEmpty($skills, 'Library should discover skills from the test fixtures directory');

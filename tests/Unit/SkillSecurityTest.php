@@ -25,6 +25,7 @@ final class SkillSecurityTest extends TestCase
 {
     private SkillLibrary $library;
 
+    #[\Override]
     protected function setUp(): void
     {
         $dir = realpath(__DIR__ . '/../Fixtures/skills')
@@ -125,7 +126,8 @@ final class SkillSecurityTest extends TestCase
     {
         $this->expectException(ValidationException::class);
 
-        $filePath = realpath(__DIR__ . '/../Fixtures/skills/example/SKILL.md');
+        $filePath = realpath(__DIR__ . '/../Fixtures/skills/example/SKILL.md')
+            ?: throw new \RuntimeException('Fixture not found');
         Arcana::create($filePath);
     }
 

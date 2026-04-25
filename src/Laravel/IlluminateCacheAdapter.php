@@ -21,11 +21,13 @@ final class IlluminateCacheAdapter implements CacheInterface
         private readonly Repository $cache,
     ) {}
 
+    #[\Override]
     public function get(string $key, mixed $default = null): mixed
     {
         return $this->cache->get($key, $default);
     }
 
+    #[\Override]
     public function set(string $key, mixed $value, \DateInterval|int|null $ttl = null): bool
     {
         if ($ttl instanceof \DateInterval) {
@@ -39,17 +41,20 @@ final class IlluminateCacheAdapter implements CacheInterface
         return $this->cache->put($key, $value, $ttl);
     }
 
+    #[\Override]
     public function delete(string $key): bool
     {
         return $this->cache->forget($key);
     }
 
+    #[\Override]
     public function clear(): bool
     {
         return $this->cache->clear();
     }
 
     /** @param iterable<string> $keys */
+    #[\Override]
     public function getMultiple(iterable $keys, mixed $default = null): iterable
     {
         foreach ($keys as $key) {
@@ -58,6 +63,7 @@ final class IlluminateCacheAdapter implements CacheInterface
     }
 
     /** @param iterable<string, mixed> $values */
+    #[\Override]
     public function setMultiple(iterable $values, \DateInterval|int|null $ttl = null): bool
     {
         $success = true;
@@ -72,6 +78,7 @@ final class IlluminateCacheAdapter implements CacheInterface
     }
 
     /** @param iterable<string> $keys */
+    #[\Override]
     public function deleteMultiple(iterable $keys): bool
     {
         $success = true;
@@ -85,6 +92,7 @@ final class IlluminateCacheAdapter implements CacheInterface
         return $success;
     }
 
+    #[\Override]
     public function has(string $key): bool
     {
         return $this->cache->has($key);

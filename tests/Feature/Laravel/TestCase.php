@@ -16,6 +16,7 @@ abstract class TestCase extends OrchestraTestCase
      *
      * @return array<int, class-string>
      */
+    #[\Override]
     protected function getPackageProviders($app): array
     {
         return [ArcanaServiceProvider::class];
@@ -24,6 +25,7 @@ abstract class TestCase extends OrchestraTestCase
     /**
      * @param \Illuminate\Foundation\Application $app
      */
+    #[\Override]
     protected function defineEnvironment($app): void
     {
         $app['config']->set('arcana.directories', [

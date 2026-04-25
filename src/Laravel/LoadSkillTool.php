@@ -38,6 +38,7 @@ final class LoadSkillTool implements Tool
         private readonly SkillLibraryInterface $library,
     ) {}
 
+    #[\Override]
     public function description(): string
     {
         return 'Load the complete Markdown content of a specific agent skill by its exact name. '
@@ -48,6 +49,7 @@ final class LoadSkillTool implements Tool
     /**
      * @return array<string, mixed>
      */
+    #[\Override]
     public function schema(JsonSchema $schema): array
     {
         return [
@@ -57,6 +59,7 @@ final class LoadSkillTool implements Tool
         ];
     }
 
+    #[\Override]
     public function handle(Request $request): string
     {
         $skill = $this->library->loadSkill($request['name']);

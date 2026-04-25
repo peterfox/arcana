@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace PeterFox\Arcana\Laravel;
 
-use Illuminate\Contracts\Cache\Repository as IlluminateCacheRepository;
+use Illuminate\Contracts\Cache\Factory as CacheFactory;
+use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Support\ServiceProvider;
 use PeterFox\Arcana\Cache\NullCache;
 use PeterFox\Arcana\Contract\SkillLibraryInterface;
@@ -26,6 +27,7 @@ use Psr\SimpleCache\CacheInterface;
  */
 final class ArcanaServiceProvider extends ServiceProvider
 {
+    #[\Override]
     public function register(): void
     {
         $this->mergeConfigFrom(
@@ -34,8 +36,7 @@ final class ArcanaServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(SkillLibraryInterface::class, function (): SkillLibrary {
-            /** @var array<string, mixed> $config */
-            $config = $this->app['config']['arcana'];
+            $config = $this->resolveConfig();
 
             return new SkillLibrary(
                 directories: (array) ($config['directories'] ?? []),
@@ -65,6 +66,17 @@ final class ArcanaServiceProvider extends ServiceProvider
     }
 
     /**
+     * @return array<string, mixed>
+     */
+    private function resolveConfig(): array
+    {
+        $configRepo = $this->app->make(ConfigRepository::class);
+        $raw = $configRepo->get('arcana', []);
+
+        return is_array($raw) ? $raw : [];
+    }
+
+    /**
      * @param array<string, mixed> $config
      */
     private function resolveCache(array $config): CacheInterface
@@ -75,23 +87,16 @@ final class ArcanaServiceProvider extends ServiceProvider
             return new NullCache();
         }
 
-        // Wrap Laravel's cache repository as a PSR-16 adapter if available.
-        if ($this->app->bound(IlluminateCacheRepository::class)) {
-            $store = $cacheConfig['store'] ?? null;
-            $repository = $store
-                ? $this->app['cache']->store($store)
-                : $this->app['cache']->store();
-
-            // Laravel's cache repository implements PSR-16 in Laravel 11+
-            if ($repository instanceof CacheInterface) {
-                return $repository;
-            }
-
-            // For older versions, wrap in a simple adapter.
-            return new IlluminateCacheAdapter($repository);
+        if (!$this->app->bound(CacheFactory::class)) {
+            return new NullCache();
         }
 
-        return new NullCache();
+        $cacheFactory = $this->app->make(CacheFactory::class);
+        $store = $cacheConfig['store'] ?? null;
+
+        return is_string($store) && $store !== ''
+            ? $cacheFactory->store($store)
+            : $cacheFactory->store();
     }
 
     /**

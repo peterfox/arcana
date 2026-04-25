@@ -21,17 +21,23 @@ use PeterFox\Arcana\Skill;
  */
 final class ShowSkillCommand extends Command
 {
-    protected $signature = 'arcana:show
+    public function __construct()
+    {
+        $this->signature = 'arcana:show
                             {name             : The exact skill name to display}
                             {--body           : Output the raw Markdown body only}
                             {--no-resources   : Exclude bundled resources from --body output}
                             {--json           : Output raw JSON}';
 
-    protected $description = 'Show the full content of a named Arcana skill';
+        $this->description = 'Show the full content of a named Arcana skill';
+
+        parent::__construct();
+    }
 
     public function handle(SkillLibraryInterface $library): int
     {
-        $name = (string) $this->argument('name');
+        $nameArg = $this->argument('name');
+        $name = is_string($nameArg) ? $nameArg : '';
 
         try {
             $skill = $library->loadSkill($name);

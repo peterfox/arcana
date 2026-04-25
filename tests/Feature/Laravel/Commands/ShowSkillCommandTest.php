@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PeterFox\Arcana\Tests\Feature\Laravel\Commands;
 
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Testing\PendingCommand;
 use PeterFox\Arcana\Laravel\Commands\ShowSkillCommand;
 use PeterFox\Arcana\Tests\Feature\Laravel\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -18,8 +19,12 @@ final class ShowSkillCommandTest extends TestCase
     {
         // Check name and description on separate lines to avoid Mockery's
         // single-expectation-per-doWrite-call limitation.
-        $this->artisan('arcana:show', ['name' => 'example-skill'])
-            ->expectsOutputToContain('example-skill')
+        $pending = $this->artisan('arcana:show', ['name' => 'example-skill']);
+
+        if (!$pending instanceof PendingCommand) {
+            throw new \RuntimeException('Unexpected return type from artisan()');
+        }
+        $pending->expectsOutputToContain('example-skill')
             ->assertSuccessful();
 
         // Verify version is present via Artisan::output() (no Mockery interception)
@@ -30,16 +35,24 @@ final class ShowSkillCommandTest extends TestCase
     #[Test]
     public function it_shows_the_author(): void
     {
-        $this->artisan('arcana:show', ['name' => 'example-skill'])
-            ->expectsOutputToContain('Peter Fox')
+        $pending = $this->artisan('arcana:show', ['name' => 'example-skill']);
+
+        if (!$pending instanceof PendingCommand) {
+            throw new \RuntimeException('Unexpected return type from artisan()');
+        }
+        $pending->expectsOutputToContain('Peter Fox')
             ->assertSuccessful();
     }
 
     #[Test]
     public function it_outputs_the_body_when_flag_is_given(): void
     {
-        $this->artisan('arcana:show', ['name' => 'example-skill', '--body' => true])
-            ->expectsOutputToContain('Example Skill')
+        $pending = $this->artisan('arcana:show', ['name' => 'example-skill', '--body' => true]);
+
+        if (!$pending instanceof PendingCommand) {
+            throw new \RuntimeException('Unexpected return type from artisan()');
+        }
+        $pending->expectsOutputToContain('Example Skill')
             ->assertSuccessful();
     }
 
@@ -61,16 +74,24 @@ final class ShowSkillCommandTest extends TestCase
     #[Test]
     public function it_fails_for_an_unknown_skill(): void
     {
-        $this->artisan('arcana:show', ['name' => 'does-not-exist'])
-            ->expectsOutputToContain("Skill 'does-not-exist' not found")
+        $pending = $this->artisan('arcana:show', ['name' => 'does-not-exist']);
+
+        if (!$pending instanceof PendingCommand) {
+            throw new \RuntimeException('Unexpected return type from artisan()');
+        }
+        $pending->expectsOutputToContain("Skill 'does-not-exist' not found")
             ->assertFailed();
     }
 
     #[Test]
     public function it_fails_for_an_invalid_skill_name(): void
     {
-        $this->artisan('arcana:show', ['name' => 'INVALID NAME!'])
-            ->expectsOutputToContain('Invalid skill name')
+        $pending = $this->artisan('arcana:show', ['name' => 'INVALID NAME!']);
+
+        if (!$pending instanceof PendingCommand) {
+            throw new \RuntimeException('Unexpected return type from artisan()');
+        }
+        $pending->expectsOutputToContain('Invalid skill name')
             ->assertFailed();
     }
 

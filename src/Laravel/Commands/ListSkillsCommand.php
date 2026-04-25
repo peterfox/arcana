@@ -19,15 +19,21 @@ use PeterFox\Arcana\SkillMetadata;
  */
 final class ListSkillsCommand extends Command
 {
-    protected $signature = 'arcana:list
+    public function __construct()
+    {
+        $this->signature = 'arcana:list
                             {--filter= : Filter skills by name, description, tags, or triggers}
                             {--json    : Output raw JSON instead of a table}';
 
-    protected $description = 'List all available Arcana agent skills';
+        $this->description = 'List all available Arcana agent skills';
+
+        parent::__construct();
+    }
 
     public function handle(SkillLibraryInterface $library): int
     {
-        $filter = $this->option('filter') ?: null;
+        $filterOption = $this->option('filter');
+        $filter = is_string($filterOption) && $filterOption !== '' ? $filterOption : null;
         $skills = $library->listSkills($filter);
 
         if ($skills === []) {
@@ -69,7 +75,7 @@ final class ListSkillsCommand extends Command
         $count = count($skills);
         $noun = $count === 1 ? 'skill' : 'skills';
         $this->line('');
-        $this->line("  <comment>Total: {$count} {$noun}</comment>" . ($filter ? " matching \"{$filter}\"" : ''));
+        $this->line("  <comment>Total: {$count} {$noun}</comment>" . ($filter !== null ? " matching \"{$filter}\"" : ''));
 
         return self::SUCCESS;
     }

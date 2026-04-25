@@ -19,6 +19,7 @@ final class SkillParserTest extends TestCase
 {
     private SkillParser $parser;
 
+    #[\Override]
     protected function setUp(): void
     {
         $this->parser = new SkillParser();
@@ -126,7 +127,12 @@ final class SkillParserTest extends TestCase
     public function it_parses_the_search_fixture_correctly(): void
     {
         $path = $this->fixturePath('search/SKILL.md');
-        $skill = $this->parser->parse(file_get_contents($path), $path);
+        $content = file_get_contents($path);
+
+        if ($content === false) {
+            throw new \RuntimeException("Could not read fixture: {$path}");
+        }
+        $skill = $this->parser->parse($content, $path);
 
         self::assertSame('web-search', $skill->metadata->name);
         self::assertSame('2.0.1', $skill->metadata->version);

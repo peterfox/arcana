@@ -24,6 +24,7 @@ final class SkillsToolTest extends TestCase
 
     private SkillsTool $tool;
 
+    #[\Override]
     protected function setUp(): void
     {
         $dir = realpath(__DIR__ . '/../Fixtures/skills')
