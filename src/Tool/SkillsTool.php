@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PeterFox\Arcana\Tool;
 
 use PeterFox\Arcana\Contract\SkillLibraryInterface;
+use PeterFox\Arcana\Exception\ValidationException;
 
 /**
  * Unified tool façade exposing list_skills and load_skill as a single
@@ -92,12 +93,12 @@ final class SkillsTool
             'load_skill' => $this->loadSkill(
                 name: isset($arguments['name'])
                     ? (string) $arguments['name']
-                    : throw new \InvalidArgumentException("Missing required argument 'name' for load_skill."),
+                    : throw new ValidationException("Missing required argument 'name' for load_skill."),
                 includeResources: isset($arguments['include_resources'])
                     ? (bool) $arguments['include_resources']
                     : true,
             ),
-            default => throw new \InvalidArgumentException(
+            default => throw new ValidationException(
                 "Unknown tool function '{$function}'. Available: list_skills, load_skill.",
             ),
         };

@@ -213,7 +213,7 @@ final class SkillLibraryTest extends TestCase
     #[Test]
     public function it_throws_for_unknown_resource(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(ValidationException::class);
 
         $skill = $this->library->loadSkill('example-skill');
         $skill->loadResource('nonexistent-resource');

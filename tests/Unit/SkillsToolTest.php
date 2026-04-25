@@ -6,6 +6,7 @@ namespace PeterFox\Arcana\Tests\Unit;
 
 use PeterFox\Arcana\Arcana;
 use PeterFox\Arcana\Exception\SkillNotFoundException;
+use PeterFox\Arcana\Exception\ValidationException;
 use PeterFox\Arcana\SkillLibrary;
 use PeterFox\Arcana\Tool\ListSkillsTool;
 use PeterFox\Arcana\Tool\LoadSkillTool;
@@ -141,7 +142,7 @@ final class SkillsToolTest extends TestCase
     #[Test]
     public function it_dispatch_throws_for_missing_name_argument(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(ValidationException::class);
         $this->expectExceptionMessageMatches("/Missing required argument 'name'/");
 
         $this->tool->dispatch('load_skill', []);
@@ -150,7 +151,7 @@ final class SkillsToolTest extends TestCase
     #[Test]
     public function it_dispatch_throws_for_unknown_function(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(ValidationException::class);
         $this->expectExceptionMessageMatches('/Unknown tool function/');
 
         $this->tool->dispatch('do_something_else', []);

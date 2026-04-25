@@ -26,13 +26,15 @@
     "require-dev": {
         "laravel/ai": "^0.6",
         "laravel/pint": "^1.29",
+        "league/flysystem": "^3.33",
         "orchestra/testbench": "^11.0",
         "phpstan/phpstan": "^1.12",
         "phpunit/phpunit": "^11.0",
         "psalm/phar": "^5.26"
     },
     "suggest": {
-        "laravel/ai": "Required for Laravel AI SDK tool integration"
+        "laravel/ai": "Required for Laravel AI SDK tool integration",
+        "league/flysystem": "Required for FlysystemSkillLibrary adapter"
     },
     "autoload": {
         "psr-4": {

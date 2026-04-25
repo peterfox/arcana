@@ -100,7 +100,7 @@ final class SkillSecurityTest extends TestCase
     #[Test]
     public function it_throws_for_unknown_resource_name(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(ValidationException::class);
         $this->expectExceptionMessageMatches('/is not declared/');
 
         $skill = $this->library->loadSkill('example-skill');

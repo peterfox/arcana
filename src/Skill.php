@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace PeterFox\Arcana;
 
-use PeterFox\Arcana\Exception\SecurityException;
+use PeterFox\Arcana\Contract\SkillResourceLoaderInterface;
+use PeterFox\Arcana\Exception\SkillParseException;
+use PeterFox\Arcana\Exception\ValidationException;
 
 /**
  * Immutable value object representing a fully-loaded AI agent skill.
@@ -23,6 +25,8 @@ final class Skill
         public readonly SkillMetadata $metadata,
         /** Full Markdown body of the skill (everything after the closing ---). */
         public readonly string $body,
+        /** Resource loader used by loadResource(). Defaults to the native PHP filesystem loader. */
+        private readonly SkillResourceLoaderInterface $resourceLoader = new NativeResourceLoader(),
     ) {}
 
     /**
@@ -62,12 +66,13 @@ final class Skill
     /**
      * Load the raw content of a named resource file bundled with this skill.
      *
-     * Path traversal is strictly enforced: resource files must reside
-     * within the skill's own directory.
+     * Path traversal is strictly enforced by the injected resource loader.
+     * The default {@see NativeResourceLoader} applies three filesystem guards;
+     * {@see \PeterFox\Arcana\Flysystem\FlysystemResourceLoader} applies the same string-level guards and
+     * delegates I/O to the configured Flysystem adapter.
      *
-     * @throws \InvalidArgumentException When the resource name is unknown.
-     * @throws SecurityException When the resolved path escapes the skill directory.
-     * @throws \RuntimeException When the file cannot be read.
+     * @throws ValidationException When the resource name is unknown.
+     * @throws SkillParseException When the file cannot be found or read.
      */
     public function loadResource(string $name): string
     {
@@ -81,63 +86,12 @@ final class Skill
         }
 
         if ($resource === null) {
-            throw new \InvalidArgumentException(
+            throw new ValidationException(
                 "Resource '{$name}' is not declared in skill '{$this->metadata->name}'.",
             );
         }
 
-        $rawRelative = $resource->path;
-
-        // Guard 1 — reject absolute paths before any filesystem access.
-        if ($rawRelative !== '' && ($rawRelative[0] === '/' || $rawRelative[0] === '\\')) {
-            throw new SecurityException(
-                'Absolute resource paths are not permitted. '
-                . "Resource '{$name}' declared path: '{$rawRelative}'.",
-            );
-        }
-
-        // Guard 2 — reject explicit traversal sequences.
-        if (str_contains($rawRelative, '..')) {
-            throw new SecurityException(
-                "Path traversal sequences ('..') are not permitted in resource paths. "
-                . "Resource '{$name}' declared path: '{$rawRelative}'.",
-            );
-        }
-
-        $skillDir = $this->metadata->directory();
-        $resolvedBase = realpath($skillDir);
-
-        if ($resolvedBase === false) {
-            throw new SecurityException(
-                "Cannot resolve skill directory: {$skillDir}",
-            );
-        }
-
-        $rawPath = $resolvedBase . DIRECTORY_SEPARATOR . $rawRelative;
-        $resolvedPath = realpath($rawPath);
-
-        if ($resolvedPath === false) {
-            throw new \RuntimeException(
-                "Resource file not found: {$rawPath}",
-            );
-        }
-
-        // Guard 3 — final check after symlink resolution: the resolved path
-        // must still be within the skill directory.
-        if (!str_starts_with($resolvedPath . DIRECTORY_SEPARATOR, $resolvedBase . DIRECTORY_SEPARATOR)) {
-            throw new SecurityException(
-                "Path traversal detected: resource '{$name}' resolved to '{$resolvedPath}', "
-                . "which is outside the skill directory '{$resolvedBase}'.",
-            );
-        }
-
-        $content = file_get_contents($resolvedPath);
-
-        if ($content === false) {
-            throw new \RuntimeException("Cannot read resource file: {$resolvedPath}");
-        }
-
-        return $content;
+        return $this->resourceLoader->load($resource, $this->metadata->directory());
     }
 
     /**
