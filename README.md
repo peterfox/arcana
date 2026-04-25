@@ -2,7 +2,7 @@
 
 **Dynamic AI Agent Skill Loader — Extend agent knowledge on demand with progressive disclosure.**
 
-[![PHP Version](https://img.shields.io/badge/php-%5E8.3-blue)](https://php.net)
+[![PHP Version](https://img.shields.io/badge/php-%5E8.4-blue)](https://php.net)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Packagist](https://img.shields.io/packagist/v/peterfox/arcana)](https://packagist.org/packages/peterfox/arcana)
 
@@ -19,11 +19,12 @@ Arcana is a lightweight, production-ready PHP library for discovering and servin
 - [Core API](#core-api)
 - [Tool Calling](#tool-calling)
 - [Laravel Integration](#laravel-integration)
-- [Laravel AI SDK Integration Guide](#laravel-ai-sdk-integration-guide)
+- [Laravel AI Integration Guide](#laravel-ai-integration-guide)
 - [Security](#security)
 - [Caching](#caching)
 - [Skill Preprocessors](#skill-preprocessors)
 - [Testing](#testing)
+- [Exception Reference](#exception-reference)
 - [Next Steps / Roadmap](#next-steps--roadmap)
 
 ---
@@ -33,11 +34,11 @@ Arcana is a lightweight, production-ready PHP library for discovering and servin
 - **Progressive disclosure** — `listSkills()` returns metadata only; `loadSkill()` fetches bodies on demand
 - **Multi-directory** — merge skills from multiple directories (your own + vendor packages)
 - **OpenAI / Anthropic / Instructor compatible** — built-in function definitions for tool calling
-- **Laravel bridge** — service provider, facade, Prism PHP tools, auto-discovery
+- **Laravel bridge** — service provider, facade, `laravel/ai` tools, Artisan commands, auto-discovery
 - **PSR-16 caching** — plug in any cache adapter; ships with a zero-overhead NullCache
 - **Preprocessor pipeline** — inject dynamic context into skills before serving them
 - **Path traversal protected** — all resource and script paths are strictly validated
-- **PHP 8.3+ strict types** — immutable value objects, `readonly`, `final`, PHPStan-ready
+- **PHP 8.4+ strict types** — immutable value objects, `readonly`, `final`, PHPStan-ready
 
 ---
 
@@ -48,14 +49,14 @@ composer require peterfox/arcana
 ```
 
 **Requirements:**
-- PHP 8.3+
+- PHP 8.4+
 - `symfony/yaml` ^7.0 (auto-installed)
 - `psr/simple-cache` ^3.0 (auto-installed)
 
-For Laravel integration:
+For Laravel integration with `laravel/ai`:
 
 ```bash
-composer require peterfox/arcana prism-php/prism
+composer require peterfox/arcana laravel/ai
 ```
 
 ---
@@ -182,7 +183,6 @@ Invalid: `WebSearch`, `my skill`, `my/skill`
 
 ```php
 use PeterFox\Arcana\Arcana;
-use PeterFox\Arcana\SkillLibrary;
 
 // Simple factory
 $library = Arcana::create('/path/to/skills');
@@ -213,9 +213,9 @@ Loads the full skill including body and resources.
 ```php
 $skill = $library->loadSkill('web-search');
 
-echo $skill->body;                    // raw Markdown body
-echo $skill->fullContent();           // body + appended resources
-echo $skill->fullContent(false);      // body only, no resources
+echo $skill->body;                     // raw Markdown body
+echo $skill->fullContent();            // body + appended resources
+echo $skill->fullContent(false);       // body only, no resources
 echo $skill->loadResource('overview'); // single resource file content
 ```
 
@@ -331,42 +331,45 @@ class MyController
 }
 ```
 
+### Artisan Commands
+
+```bash
+# List all skills
+php artisan arcana:list
+
+# Filter by keyword
+php artisan arcana:list --filter=search
+
+# JSON output (for scripting)
+php artisan arcana:list --json
+
+# Show a specific skill
+php artisan arcana:show web-search
+
+# Show only the Markdown body
+php artisan arcana:show web-search --body
+
+# Show as JSON
+php artisan arcana:show web-search --json
+```
+
 ---
 
-## Laravel AI SDK Integration Guide
+## Laravel AI Integration Guide
 
-Arcana ships with first-class support for **Prism PHP** (`prism-php/prism`) — the Laravel AI SDK.
+Arcana ships with first-class support for **[Laravel AI](https://laravel.com/docs/ai)** (`laravel/ai`), Laravel's official AI SDK.
 
 ### Installation
 
 ```bash
-composer require peterfox/arcana prism-php/prism
+composer require peterfox/arcana laravel/ai
 ```
 
-### Basic Usage
+### How It Works
 
-```php
-use Prism\Prism\Prism;
-use PeterFox\Arcana\Laravel\ListSkillsTool;
-use PeterFox\Arcana\Laravel\LoadSkillTool;
+`ListSkillsTool` and `LoadSkillTool` implement `Laravel\Ai\Contracts\Tool`. Laravel AI automatically invokes them when a model decides to call them. The tools handle the skill library interaction; your agent class just declares them.
 
-$response = Prism::text()
-    ->using('anthropic', 'claude-opus-4-6')
-    ->withSystemPrompt('You are a helpful AI assistant with access to a skill library.')
-    ->withPrompt($userMessage)
-    ->withTools([
-        app(ListSkillsTool::class)(),
-        app(LoadSkillTool::class)(),
-    ])
-    ->generate();
-
-echo $response->text;
-```
-
-### Full Agent Class Example
-
-Here is a complete, production-ready agent that uses Arcana skills for progressive
-knowledge loading:
+### Basic Agent
 
 ```php
 <?php
@@ -375,92 +378,131 @@ declare(strict_types=1);
 
 namespace App\Agents;
 
-use Illuminate\Support\Facades\Log;
+use Laravel\Ai\Attributes\Model;
+use Laravel\Ai\Attributes\Provider;
+use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasTools;
+use Laravel\Ai\Promptable;
 use PeterFox\Arcana\Laravel\ListSkillsTool;
 use PeterFox\Arcana\Laravel\LoadSkillTool;
-use Prism\Prism\Prism;
-use Prism\Prism\Enums\Provider;
-use Prism\Prism\ValueObjects\Messages\AssistantMessage;
-use Prism\Prism\ValueObjects\Messages\SystemMessage;
-use Prism\Prism\ValueObjects\Messages\UserMessage;
 
-final class SkillAwareAgent
+#[Provider('anthropic')]
+#[Model('claude-opus-4-6')]
+final class SkillAwareAgent implements Agent, HasTools
 {
-    private const SYSTEM_PROMPT = <<<'PROMPT'
-        You are a helpful, knowledgeable AI assistant.
-
-        You have access to a library of specialised skills that extend your capabilities.
-        Before responding to a request, always:
-
-        1. Call list_skills to discover available capabilities
-        2. If a relevant skill exists, call load_skill to get its full instructions
-        3. Follow the skill's instructions when formulating your response
-
-        Be concise, accurate, and transparent about which skill you are using.
-        PROMPT;
+    use Promptable;
 
     public function __construct(
-        private readonly ListSkillsTool $listSkillsTool,
-        private readonly LoadSkillTool $loadSkillTool,
+        private readonly ListSkillsTool $listSkills,
+        private readonly LoadSkillTool $loadSkill,
     ) {}
 
-    public function handle(string $userMessage): string
+    public function instructions(): string
     {
-        $response = Prism::text()
-            ->using(Provider::Anthropic, 'claude-opus-4-6')
-            ->withSystemPrompt(self::SYSTEM_PROMPT)
-            ->withPrompt($userMessage)
-            ->withTools([
-                ($this->listSkillsTool)(),
-                ($this->loadSkillTool)(),
-            ])
-            ->withMaxSteps(10)   // limit agentic loop depth
-            ->generate();
+        return <<<'PROMPT'
+            You are a helpful, knowledgeable AI assistant.
 
-        Log::debug('Arcana agent completed', [
-            'steps'        => $response->steps->count(),
-            'tool_calls'   => $response->toolCallsCount,
-            'finish_reason' => $response->finishReason,
-        ]);
+            You have access to a library of specialised skills that extend your capabilities.
+            Before responding to a request, always:
 
-        return $response->text;
+            1. Call list_skills to discover available capabilities
+            2. If a relevant skill exists, call load_skill to get its full instructions
+            3. Follow the skill's instructions when formulating your response
+
+            Be concise, accurate, and transparent about which skill you are using.
+            PROMPT;
+    }
+
+    public function tools(): iterable
+    {
+        return [$this->listSkills, $this->loadSkill];
     }
 }
 ```
 
-Register it in a service provider:
+### Calling the Agent
 
 ```php
-// AppServiceProvider.php
-$this->app->singleton(SkillAwareAgent::class);
+// Resolve from the container (auto-wires tool dependencies)
+$agent = SkillAwareAgent::make();
+
+$response = $agent->prompt('Help me search the web for the latest PHP news');
+
+echo $response->text;
 ```
 
-### Route / Controller Example
+### Full Controller Example
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Agents\SkillAwareAgent;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+final class AgentController extends Controller
+{
+    public function __invoke(SkillAwareAgent $agent, Request $request): JsonResponse
+    {
+        $message = $request->validate(['message' => 'required|string|max:2000'])['message'];
+
+        $response = $agent->prompt($message);
+
+        return response()->json(['reply' => $response->text]);
+    }
+}
+```
 
 ```php
 // routes/api.php
-Route::post('/agent', function (SkillAwareAgent $agent, Request $request) {
-    $message = $request->validate(['message' => 'required|string|max:2000'])['message'];
+Route::post('/agent', AgentController::class);
+```
 
-    return response()->json([
-        'reply' => $agent->handle($message),
-    ]);
+### Streaming Responses
+
+```php
+$stream = $agent->stream($userMessage);
+
+return response()->stream(function () use ($stream) {
+    foreach ($stream as $event) {
+        if ($event instanceof \Laravel\Ai\Streaming\Events\TextDelta) {
+            echo $event->text;
+            ob_flush();
+            flush();
+        }
+    }
 });
 ```
 
-### Multi-Provider Example
+### Multi-Provider Support
 
-Arcana tools are provider-agnostic — swap the model with one line:
+Switch provider and model at call time without changing your agent class:
 
 ```php
-// Use OpenAI
-Prism::text()->using(Provider::OpenAI, 'gpt-4o')
+use Laravel\Ai\Enums\Lab;
 
-// Use Groq
-Prism::text()->using(Provider::Groq, 'llama-3.3-70b-versatile')
+// Use the default provider from config/ai.php
+$agent->prompt($message);
 
-// Use Mistral
-Prism::text()->using(Provider::Mistral, 'mistral-large-latest')
+// Override at call time
+$agent->prompt($message, provider: 'openai', model: 'gpt-4o');
+$agent->prompt($message, provider: 'gemini', model: 'gemini-2.0-flash');
+
+// Use a Lab preset
+$agent->prompt($message, provider: Lab::Smartest);
+$agent->prompt($message, provider: Lab::Cheapest);
+```
+
+### Queued Agent Calls
+
+For long-running or background processing:
+
+```php
+$agent->queue($message)->then(function ($response) {
+    // handle response
+});
 ```
 
 ### Structuring Your Skills Directory
@@ -507,7 +549,7 @@ Skills are cached individually. When you update a skill file, clear the cache:
 ```bash
 php artisan cache:forget arcana.skill.web-search
 # or clear all Arcana entries
-php artisan cache:clear   # clears the whole store
+php artisan cache:clear
 ```
 
 ---
@@ -516,12 +558,10 @@ php artisan cache:clear   # clears the whole store
 
 ### Path Traversal Protection
 
-All resource and script paths declared in a skill's frontmatter are validated against
-the skill's own directory using `realpath()`. Any path that resolves outside the skill
-directory throws a `SecurityException`:
+All resource and script paths declared in a skill's frontmatter are validated against the skill's own directory using `realpath()`. Any path that resolves outside the skill directory throws a `SecurityException`:
 
 ```php
-// This is safe — resources/overview.md is inside the skill directory
+// Safe — resources/overview.md is inside the skill directory
 $skill->loadResource('overview');
 
 // If a SKILL.md declared path: ../../etc/passwd, Arcana would throw:
@@ -539,9 +579,7 @@ This prevents any `loadSkill('../etc/passwd')` style attacks.
 
 ### Script Execution
 
-The `SkillScript` metadata is stored but **no scripts are executed** by default.
-Script execution is opt-in through a custom `SkillPreprocessorInterface`
-implementation, which you write and control entirely.
+The `SkillScript` metadata is stored but **no scripts are executed** by default. Script execution is opt-in through a custom `SkillPreprocessorInterface` implementation, which you write and control entirely.
 
 ---
 
@@ -567,21 +605,17 @@ Cached items:
 |---|---|---|
 | `arcana.skill.{name}` | Full `Skill` object | configurable |
 
-The in-memory metadata index is **not** stored in PSR-16; it lives for the duration
-of the request/process. Filesystem scanning happens at most once per `SkillLibrary`
-instance.
+The in-memory metadata index is **not** stored in PSR-16; it lives for the duration of the request/process. Filesystem scanning happens at most once per `SkillLibrary` instance.
 
 ---
 
 ## Skill Preprocessors
 
-Preprocessors transform skill content at load time, before caching. Implement
-`SkillPreprocessorInterface`:
+Preprocessors transform skill content at load time, before caching. Implement `SkillPreprocessorInterface`:
 
 ```php
 use PeterFox\Arcana\Contract\SkillPreprocessorInterface;
 use PeterFox\Arcana\Skill;
-use PeterFox\Arcana\SkillMetadata;
 
 final class VariablePreprocessor implements SkillPreprocessorInterface
 {
@@ -623,7 +657,7 @@ In Laravel, register via config:
 ## Testing
 
 ```bash
-# Run the test suite
+# Run the full test suite (Unit + Feature)
 composer test
 
 # Or directly
@@ -631,6 +665,12 @@ composer test
 
 # With coverage
 ./vendor/bin/phpunit --coverage-text
+
+# Unit tests only
+./vendor/bin/phpunit --testsuite Unit
+
+# Laravel feature tests only
+./vendor/bin/phpunit --testsuite Feature
 ```
 
 ### In Your Application
@@ -644,6 +684,23 @@ $library = Arcana::create($this->skillsFixturePath);
 
 $skills = $library->listSkills();
 self::assertCount(2, $skills);
+```
+
+### Testing Laravel Agents with `laravel/ai` Fakes
+
+```php
+use App\Agents\SkillAwareAgent;
+use Laravel\Ai\Gateway\FakeTextGateway;
+
+// Fake all agent responses
+SkillAwareAgent::fake(['Hello from the fake agent.']);
+
+$agent = SkillAwareAgent::make();
+$response = $agent->prompt('Test message');
+
+self::assertSame('Hello from the fake agent.', $response->text);
+
+SkillAwareAgent::assertPrompted('Test message');
 ```
 
 ---
@@ -667,19 +724,7 @@ self::assertCount(2, $skills);
 - `ScriptPreprocessor` — sandboxed PHP script execution for dynamic skill context injection
 - PSR-16 index caching — persist the file index across requests for sub-millisecond listing
 - Skill watchers — filesystem watcher to auto-invalidate cache on SKILL.md changes
-- `SkillRegistry` — in-process singleton for shared library access
-
-### v0.3 — Vendor Skill Packs
-
-- Composer skill pack convention — `extra.arcana.skills` in vendor `composer.json`
-- Auto-registration of vendor skill directories
-- Skill versioning and conflict resolution
-
-### v0.4 — Enhanced Tooling
-
-- Artisan commands: `arcana:list`, `arcana:show {name}`, `arcana:validate`
-- PHPStan plugin for skill type analysis
-- Rector rules for migrating between SKILL.md versions
+- `artisan arcana:validate` — lint all skills for missing fields and formatting issues
 
 ---
 
@@ -689,7 +734,7 @@ Contributions are welcome! Please open an issue first to discuss significant cha
 
 1. Fork the repository
 2. Create your feature branch: `git checkout -b feature/my-feature`
-3. Run tests: `./vendor/bin/phpunit`
+3. Run tests: `composer check`
 4. Submit a PR against `main`
 
 ---
