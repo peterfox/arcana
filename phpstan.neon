@@ -1,5 +1,6 @@
 includes:
     - vendor/phpstan/phpstan-deprecation-rules/rules.neon
+    - vendor/peterfox/phpstan-toon-formatter/extension.neon
 
 parameters:
     level: 8
@@ -11,7 +12,5 @@ parameters:
         # that includes the Laravel extension.
         - src/Laravel
 
-    checkMissingIterableValueType: true
-    checkGenericClassInNonGenericObjectType: true
     checkMissingOverrideMethodAttribute: true
     reportUnmatchedIgnoredErrors: false

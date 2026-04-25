@@ -24,14 +24,16 @@
         "symfony/yaml": "^7.0"
     },
     "require-dev": {
-        "laravel/ai": "^0.6",
-        "laravel/pint": "^1.29",
+        "laravel/ai": "^0.6.3",
+        "laravel/pint": "^1.29.1",
         "league/flysystem": "^3.33",
-        "orchestra/testbench": "^11.0",
-        "phpstan/phpstan": "^1.12",
-        "phpstan/phpstan-deprecation-rules": "^1.2",
-        "phpunit/phpunit": "^11.0",
-        "psalm/phar": "^5.26"
+        "orchestra/testbench": "^11.1",
+        "peterfox/phpstan-toon-formatter": "^1.1",
+        "peterfox/phpunit-toon-result-printer": "^1.2",
+        "phpstan/phpstan": "^2.1.51",
+        "phpstan/phpstan-deprecation-rules": "^2.0.4",
+        "phpunit/phpunit": "^11.5.55",
+        "psalm/phar": "^5.26.1"
     },
     "suggest": {
         "laravel/ai": "Required for Laravel AI SDK tool integration",
@@ -67,7 +69,15 @@
             "@lint:check",
             "@analyse",
             "@test"
-        ]
+        ],
+        "check:ai": [
+            "@lint:check:ai",
+            "@analyse:ai",
+            "@test:ai"
+        ],
+        "lint:check:ai": "pint --test --format=agent",
+        "analyse:ai": "phpstan analyse --no-progress --error-format=toon",
+        "test:ai": "phpunit --no-coverage --extension \"PeterFox\\PhpUnitToonResultPrinter\\ToonResultPrinterExtension\""
     },
     "scripts-descriptions": {
         "test": "Run the PHPUnit test suite",
@@ -75,7 +85,11 @@
         "analyse": "Run PHPStan static analysis (level 8)",
         "lint": "Fix code style with Laravel Pint",
         "lint:check": "Check code style without making changes (CI-safe)",
-        "check": "Check style, run static analysis, then run tests"
+        "check": "Check style, run static analysis, then run tests",
+        "check:ai": "AI-optimised check: style, analysis, and tests with structured output",
+        "lint:check:ai": "Check code style with agent-friendly output",
+        "analyse:ai": "Run PHPStan with toon error format for AI agents",
+        "test:ai": "Run PHPUnit with toon result printer for AI agents"
     },
     "config": {
         "sort-packages": true,
