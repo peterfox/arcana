@@ -9,3 +9,13 @@ parameters:
         - tests
     checkMissingOverrideMethodAttribute: true
     reportUnmatchedIgnoredErrors: false
+
+services:
+    -
+        class: PeterFox\Arcana\PHPStan\DisallowRuntimeExceptionThrowRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: PeterFox\Arcana\PHPStan\DisallowRuntimeExceptionExtendRule
+        tags:
+            - phpstan.rules.rule
