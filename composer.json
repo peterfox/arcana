@@ -27,6 +27,7 @@
         "laravel/ai": "^0.6.3",
         "laravel/pint": "^1.29.1",
         "league/flysystem": "^3.33",
+        "league/flysystem-memory": "^3.31",
         "orchestra/testbench": "^11.1",
         "peterfox/phpstan-toon-formatter": "^1.1",
         "peterfox/phpunit-toon-result-printer": "^1.2",

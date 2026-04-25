@@ -95,6 +95,22 @@ final class Skill
     }
 
     /**
+     * Return a copy of this skill with a new body, preserving the resource loader.
+     *
+     * Prefer this over constructing a bare `new Skill(...)` in preprocessors so
+     * that the injected resource loader (e.g. {@see \PeterFox\Arcana\Flysystem\FlysystemResourceLoader})
+     * is carried forward to the returned instance.
+     */
+    public function withBody(string $body): self
+    {
+        return new self(
+            metadata: $this->metadata,
+            body: $body,
+            resourceLoader: $this->resourceLoader,
+        );
+    }
+
+    /**
      * Convenience accessor for the skill name.
      */
     public function name(): string

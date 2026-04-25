@@ -150,6 +150,14 @@ final class FlysystemSkillLibrary implements SkillLibraryInterface
         $this->cache->clear();
     }
 
+    /**
+     * Returns the number of discovered skills without loading any body content.
+     */
+    public function count(): int
+    {
+        return count($this->buildMetadataIndex());
+    }
+
     // -------------------------------------------------------------------------
     // Private helpers
     // -------------------------------------------------------------------------
@@ -170,7 +178,7 @@ final class FlysystemSkillLibrary implements SkillLibraryInterface
         foreach ($this->discoverSkillFiles() as $path) {
             try {
                 $content = $this->filesystem->read($path);
-                $metadata = $this->parser->parse($content, $path)->metadata;
+                $metadata = $this->parser->parseMetadataOnlyFromContent($content, $path);
 
                 // Later files do NOT override earlier ones; first wins.
                 if (!isset($this->metadataIndex[$metadata->name])) {

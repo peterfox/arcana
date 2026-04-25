@@ -64,7 +64,20 @@ final class SkillParser
      */
     public function parseMetadataOnly(string $filePath): SkillMetadata
     {
-        $content = $this->readFile($filePath);
+        return $this->parseMetadataOnlyFromContent($this->readFile($filePath), $filePath);
+    }
+
+    /**
+     * Parse only the YAML frontmatter from already-loaded content.
+     *
+     * Use this when the content has already been fetched externally (e.g. via
+     * Flysystem). Unlike {@see self::parseMetadataOnly()}, this method does not
+     * perform any filesystem access.
+     *
+     * @throws SkillParseException
+     */
+    public function parseMetadataOnlyFromContent(string $content, string $filePath): SkillMetadata
+    {
         [$data] = $this->splitContent($content, $filePath);
 
         return $this->buildMetadata($data, $filePath);
