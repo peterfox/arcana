@@ -15,27 +15,32 @@ use Psr\SimpleCache\CacheInterface;
  */
 final class NullCache implements CacheInterface
 {
+    #[\Override]
     public function get(string $key, mixed $default = null): mixed
     {
         return $default;
     }
 
+    #[\Override]
     public function set(string $key, mixed $value, \DateInterval|int|null $ttl = null): bool
     {
         return true;
     }
 
+    #[\Override]
     public function delete(string $key): bool
     {
         return true;
     }
 
+    #[\Override]
     public function clear(): bool
     {
         return true;
     }
 
     /** @param iterable<string> $keys */
+    #[\Override]
     public function getMultiple(iterable $keys, mixed $default = null): iterable
     {
         foreach ($keys as $key) {
@@ -46,17 +51,20 @@ final class NullCache implements CacheInterface
     /**
      * @param iterable<string, mixed> $values
      */
+    #[\Override]
     public function setMultiple(iterable $values, \DateInterval|int|null $ttl = null): bool
     {
         return true;
     }
 
     /** @param iterable<string> $keys */
+    #[\Override]
     public function deleteMultiple(iterable $keys): bool
     {
         return true;
     }
 
+    #[\Override]
     public function has(string $key): bool
     {
         return false;

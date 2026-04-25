@@ -23,6 +23,7 @@ final class NativeResourceLoader implements SkillResourceLoaderInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function load(SkillResource $resource, string $skillDirectory): string
     {
         $rawRelative = $resource->path;

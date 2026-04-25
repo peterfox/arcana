@@ -14,6 +14,7 @@ use PeterFox\Arcana\Contract\SkillPreprocessorInterface;
  */
 final class NullPreprocessor implements SkillPreprocessorInterface
 {
+    #[\Override]
     public function process(Skill $skill): Skill
     {
         return $skill;

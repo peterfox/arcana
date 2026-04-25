@@ -33,6 +33,7 @@ final class CompositePreprocessor implements SkillPreprocessorInterface
         $this->preprocessors = array_values($preprocessors);
     }
 
+    #[\Override]
     public function process(Skill $skill): Skill
     {
         foreach ($this->preprocessors as $preprocessor) {

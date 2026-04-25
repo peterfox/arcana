@@ -1,3 +1,6 @@
+includes:
+    - vendor/phpstan/phpstan-deprecation-rules/rules.neon
+
 parameters:
     level: 8
     paths:
@@ -10,4 +13,5 @@ parameters:
 
     checkMissingIterableValueType: true
     checkGenericClassInNonGenericObjectType: true
+    checkMissingOverrideMethodAttribute: true
     reportUnmatchedIgnoredErrors: false

@@ -75,6 +75,7 @@ final class SkillLibrary implements SkillLibraryInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function listSkills(?string $filter = null): array
     {
         $index = $this->buildMetadataIndex();
@@ -90,6 +91,7 @@ final class SkillLibrary implements SkillLibraryInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function loadSkill(string $name): Skill
     {
         $this->assertValidName($name);
@@ -131,6 +133,7 @@ final class SkillLibrary implements SkillLibraryInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function hasSkill(string $name): bool
     {
         try {

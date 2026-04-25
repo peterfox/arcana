@@ -29,6 +29,7 @@
         "league/flysystem": "^3.33",
         "orchestra/testbench": "^11.0",
         "phpstan/phpstan": "^1.12",
+        "phpstan/phpstan-deprecation-rules": "^1.2",
         "phpunit/phpunit": "^11.0",
         "psalm/phar": "^5.26"
     },
