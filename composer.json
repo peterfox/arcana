@@ -21,7 +21,7 @@
     "require": {
         "php": "^8.4",
         "psr/simple-cache": "^3.0",
-        "symfony/yaml": "^7.0"
+        "symfony/yaml": "^7.0 || ^8.0"
     },
     "require-dev": {
         "laravel/ai": "^0.6.3",
