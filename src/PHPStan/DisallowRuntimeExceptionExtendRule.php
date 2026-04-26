@@ -50,7 +50,7 @@ final class DisallowRuntimeExceptionExtendRule implements Rule
 
         return [
             RuleErrorBuilder::message(
-                'Extend PeterFox\Arcana\Exception\ArcanaException instead of \RuntimeException directly.'
+                'Extend PeterFox\Arcana\Exception\ArcanaException instead of \RuntimeException directly.',
             )
                 ->identifier('arcana.runtimeException.extend')
                 ->build(),

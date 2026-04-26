@@ -37,7 +37,7 @@ final class DisallowRuntimeExceptionThrowRule implements Rule
 
         return [
             RuleErrorBuilder::message(
-                'Use PeterFox\Arcana\Exception\ArcanaException or a subclass instead of \RuntimeException directly.'
+                'Use PeterFox\Arcana\Exception\ArcanaException or a subclass instead of \RuntimeException directly.',
             )
                 ->identifier('arcana.runtimeException.throw')
                 ->build(),
