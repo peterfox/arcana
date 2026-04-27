@@ -72,12 +72,15 @@
             "@test"
         ],
         "check:ai": [
+            "printf 'lint:'",
             "@lint:ai",
+            "printf '\\nphpstan:'",
             "@analyse:ai",
+            "printf '\\ntests:'",
             "@test:ai"
         ],
         "lint:ai": "pint --format=agent",
-        "analyse:ai": "phpstan analyse --no-progress --error-format=toon",
+        "analyse:ai": "phpstan analyse --no-progress --error-format=toon -c phpstan.neon",
         "test:ai": "phpunit --no-coverage --extension \"PeterFox\\PhpUnitToonResultPrinter\\ToonResultPrinterExtension\""
     },
     "scripts-descriptions": {
