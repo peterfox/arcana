@@ -188,6 +188,7 @@ final class SkillSecurityTest extends TestCase
     private function makeScriptRunner(): NativeScriptRunner
     {
         return new class extends NativeScriptRunner {
+            #[\Override]
             protected function execute(SkillScript $script, string $resolvedPath): string
             {
                 return '';

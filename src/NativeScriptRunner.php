@@ -77,8 +77,8 @@ abstract class NativeScriptRunner implements SkillScriptRunnerInterface
      * This method is only called after all three path containment guards have
      * passed. The $resolvedPath is guaranteed to be within the skill directory.
      *
-     * @param SkillScript $script       The script descriptor (includes language, name, description).
-     * @param string      $resolvedPath Verified absolute path to the script file.
+     * @param SkillScript $script The script descriptor (includes language, name, description).
+     * @param string $resolvedPath Verified absolute path to the script file.
      *
      * @throws SkillParseException When the script cannot be executed or produces no output.
      */

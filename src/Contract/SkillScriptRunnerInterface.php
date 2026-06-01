@@ -26,10 +26,10 @@ interface SkillScriptRunnerInterface
     /**
      * Execute a script and return its output as a string.
      *
-     * @param SkillScript $script        The script descriptor from the skill's frontmatter.
-     * @param string      $skillDirectory The root directory of the skill (used to resolve relative paths).
+     * @param SkillScript $script The script descriptor from the skill's frontmatter.
+     * @param string $skillDirectory The root directory of the skill (used to resolve relative paths).
      *
-     * @throws SecurityException   When the script path attempts to escape the skill directory.
+     * @throws SecurityException When the script path attempts to escape the skill directory.
      * @throws SkillParseException When the script file cannot be found or read.
      */
     public function run(SkillScript $script, string $skillDirectory): string;
