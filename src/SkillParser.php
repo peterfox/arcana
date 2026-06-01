@@ -283,9 +283,21 @@ final class SkillParser
                 continue;
             }
 
+            $url = isset($item['url']) ? (string) $item['url'] : '';
+
+            // Only allow http and https schemes. Rejecting other schemes
+            // (javascript:, data:, ftp:, file:, etc.) prevents XSS if a
+            // consumer renders reference URLs in HTML without escaping.
+            if ($url !== '' && !preg_match('/^https?:\/\//i', $url)) {
+                throw new SkillParseException(
+                    message: "Reference URL must use http or https scheme. Got: '{$url}'.",
+                    filePath: $filePath,
+                );
+            }
+
             $references[] = new SkillReference(
                 title: isset($item['title']) ? (string) $item['title'] : '',
-                url: isset($item['url']) ? (string) $item['url'] : '',
+                url: $url,
             );
         }
 

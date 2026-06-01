@@ -7,8 +7,8 @@ namespace PeterFox\Arcana\Flysystem;
 use League\Flysystem\FilesystemException;
 use League\Flysystem\FilesystemOperator;
 use PeterFox\Arcana\Contract\SkillScriptRunnerInterface;
-use PeterFox\Arcana\Exception\SecurityException;
 use PeterFox\Arcana\Exception\SkillParseException;
+use PeterFox\Arcana\Security\PathGuard;
 use PeterFox\Arcana\SkillScript;
 
 /**
@@ -38,19 +38,10 @@ final class FlysystemScriptRunner implements SkillScriptRunnerInterface
     #[\Override]
     public function run(SkillScript $script, string $skillDirectory): string
     {
-        $rawRelative = $script->path;
+        PathGuard::assertNotAbsolute('script', $script->name, $script->path);
+        PathGuard::assertNoTraversal('script', $script->name, $script->path);
 
-        // Guard 1 — reject absolute paths.
-        if ($rawRelative !== '' && ($rawRelative[0] === '/' || $rawRelative[0] === '\\')) {
-            throw SecurityException::absolutePathRejected('script', $script->name, $rawRelative);
-        }
-
-        // Guard 2 — reject explicit traversal sequences.
-        if (str_contains($rawRelative, '..')) {
-            throw SecurityException::traversalSequenceRejected('script', $script->name, $rawRelative);
-        }
-
-        $path = rtrim($skillDirectory, '/') . '/' . $rawRelative;
+        $path = rtrim($skillDirectory, '/') . '/' . $script->path;
 
         try {
             return $this->filesystem->read($path);
