@@ -43,13 +43,16 @@ final class SkillLibrary implements SkillLibraryInterface
     /** @var array<string, SkillMetadata>|null In-memory metadata index: name → metadata. */
     private ?array $metadataIndex = null;
 
+    private readonly SkillParser $parser;
+
     /**
      * @param string|array<string> $directories One or more directories to scan for SKILL.md files.
      * @param CacheInterface $cache PSR-16 cache. Defaults to NullCache (no caching).
      * @param SkillPreprocessorInterface|null $preprocessor Optional preprocessor applied before caching.
      * @param int $cacheTtl Cache TTL in seconds (default: 1 hour).
      * @param string $cachePrefix Prefix for all cache keys.
-     * @param SkillParser $parser Parser instance (injectable for testing).
+     * @param int $maxFileSizeBytes Maximum SKILL.md file size in bytes (default: 1 MiB).
+     * @param SkillParser|null $parser Parser instance (injectable for testing).
      *
      * @throws ValidationException When a supplied directory does not exist.
      */
@@ -59,8 +62,11 @@ final class SkillLibrary implements SkillLibraryInterface
         private readonly ?SkillPreprocessorInterface $preprocessor = null,
         private readonly int $cacheTtl = 3600,
         private readonly string $cachePrefix = 'arcana.',
-        private readonly SkillParser $parser = new SkillParser(),
+        private readonly int $maxFileSizeBytes = SkillParser::DEFAULT_MAX_FILE_SIZE,
+        ?SkillParser $parser = null,
     ) {
+        $this->parser = $parser ?? new SkillParser($maxFileSizeBytes);
+
         $dirs = is_array($directories) ? $directories : [$directories];
 
         $this->directories = array_values(
@@ -110,6 +116,21 @@ final class SkillLibrary implements SkillLibraryInterface
         }
 
         $filePath = $index[$name]->filePath;
+
+        $size = filesize($filePath);
+
+        if ($size !== false && $size > $this->maxFileSizeBytes) {
+            throw new SkillParseException(
+                message: sprintf(
+                    'SKILL.md file is too large (%s bytes). Maximum permitted size is %s bytes. '
+                    . 'This limit exists to prevent memory exhaustion from oversized skill files.',
+                    number_format($size),
+                    number_format($this->maxFileSizeBytes),
+                ),
+                filePath: $filePath,
+            );
+        }
+
         $content = file_get_contents($filePath);
 
         if ($content === false) {

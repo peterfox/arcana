@@ -36,13 +36,16 @@ final class FlysystemSkillLibrary implements SkillLibraryInterface
     /** @var array<string, SkillMetadata>|null In-memory metadata index: name → metadata. */
     private ?array $metadataIndex = null;
 
+    private readonly SkillParser $parser;
+
     /**
      * @param FilesystemOperator $filesystem Flysystem filesystem to read skills from.
      * @param CacheInterface $cache PSR-16 cache. Defaults to NullCache (no caching).
      * @param SkillPreprocessorInterface|null $preprocessor Optional preprocessor applied before caching.
      * @param int $cacheTtl Cache TTL in seconds (default: 1 hour).
      * @param string $cachePrefix Prefix for all cache keys.
-     * @param SkillParser $parser Parser instance (injectable for testing).
+     * @param int $maxFileSizeBytes Maximum SKILL.md file size in bytes (default: 1 MiB).
+     * @param SkillParser|null $parser Parser instance (injectable for testing).
      */
     public function __construct(
         private readonly FilesystemOperator $filesystem,
@@ -50,8 +53,11 @@ final class FlysystemSkillLibrary implements SkillLibraryInterface
         private readonly ?SkillPreprocessorInterface $preprocessor = null,
         private readonly int $cacheTtl = 3600,
         private readonly string $cachePrefix = 'arcana.',
-        private readonly SkillParser $parser = new SkillParser(),
-    ) {}
+        private readonly int $maxFileSizeBytes = SkillParser::DEFAULT_MAX_FILE_SIZE,
+        ?SkillParser $parser = null,
+    ) {
+        $this->parser = $parser ?? new SkillParser($maxFileSizeBytes);
+    }
 
     // -------------------------------------------------------------------------
     // SkillLibraryInterface
@@ -95,6 +101,24 @@ final class FlysystemSkillLibrary implements SkillLibraryInterface
         }
 
         $filePath = $index[$name]->filePath;
+
+        try {
+            $size = $this->filesystem->fileSize($filePath);
+        } catch (FilesystemException) {
+            $size = 0;
+        }
+
+        if ($size > $this->maxFileSizeBytes) {
+            throw new SkillParseException(
+                message: sprintf(
+                    'SKILL.md file is too large (%s bytes). Maximum permitted size is %s bytes. '
+                    . 'This limit exists to prevent memory exhaustion from oversized skill files.',
+                    number_format($size),
+                    number_format($this->maxFileSizeBytes),
+                ),
+                filePath: $filePath,
+            );
+        }
 
         try {
             $content = $this->filesystem->read($filePath);

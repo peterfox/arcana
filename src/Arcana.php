@@ -42,6 +42,7 @@ final class Arcana
      * @param SkillPreprocessorInterface|null $preprocessor Optional preprocessor pipeline.
      * @param int $cacheTtl Cache TTL in seconds (default: 3600).
      * @param string $cachePrefix Cache key prefix (default: 'arcana.').
+     * @param int $maxFileSizeBytes Maximum SKILL.md file size in bytes (default: 1 MiB).
      */
     public static function create(
         string|array $directories,
@@ -49,6 +50,7 @@ final class Arcana
         ?SkillPreprocessorInterface $preprocessor = null,
         int $cacheTtl = 3600,
         string $cachePrefix = 'arcana.',
+        int $maxFileSizeBytes = SkillParser::DEFAULT_MAX_FILE_SIZE,
     ): SkillLibrary {
         return new SkillLibrary(
             directories: $directories,
@@ -56,6 +58,7 @@ final class Arcana
             preprocessor: $preprocessor,
             cacheTtl: $cacheTtl,
             cachePrefix: $cachePrefix,
+            maxFileSizeBytes: $maxFileSizeBytes,
         );
     }
 

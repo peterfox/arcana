@@ -35,6 +35,18 @@ final class SkillParser
      */
     private const FRONTMATTER_PATTERN = '/^---[ \t]*\r?\n(.*?)\r?\n---[ \t]*\r?\n?(.*)/s';
 
+    /** Default maximum SKILL.md file size: 1 MiB. */
+    public const DEFAULT_MAX_FILE_SIZE = 1_048_576;
+
+    /**
+     * @param int $maxFileSizeBytes Maximum permitted SKILL.md file size in bytes.
+     *                              Files exceeding this limit are rejected before parsing
+     *                              to prevent memory exhaustion from maliciously large inputs.
+     */
+    public function __construct(
+        private readonly int $maxFileSizeBytes = self::DEFAULT_MAX_FILE_SIZE,
+    ) {}
+
     /**
      * Parse the full contents of a SKILL.md file.
      *
@@ -309,6 +321,20 @@ final class SkillParser
         if (!is_file($filePath)) {
             throw new SkillParseException(
                 message: 'File not found.',
+                filePath: $filePath,
+            );
+        }
+
+        $size = filesize($filePath);
+
+        if ($size !== false && $size > $this->maxFileSizeBytes) {
+            throw new SkillParseException(
+                message: sprintf(
+                    'SKILL.md file is too large (%s bytes). Maximum permitted size is %s bytes. '
+                    . 'This limit exists to prevent memory exhaustion from oversized skill files.',
+                    number_format($size),
+                    number_format($this->maxFileSizeBytes),
+                ),
                 filePath: $filePath,
             );
         }
