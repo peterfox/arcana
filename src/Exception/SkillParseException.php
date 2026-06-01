@@ -7,6 +7,15 @@ namespace PeterFox\Arcana\Exception;
 /**
  * Thrown when a SKILL.md file cannot be parsed due to malformed YAML
  * frontmatter, missing required fields, or invalid structure.
+ *
+ * The file path is available as a separate property for logging:
+ *
+ *   } catch (SkillParseException $e) {
+ *       $logger->error($e->getMessage(), ['file' => $e->filePath]);
+ *   }
+ *
+ * It is intentionally excluded from the exception message to avoid leaking
+ * server filesystem paths to API responses or LLM tool-call results.
  */
 final class SkillParseException extends ArcanaException
 {
@@ -15,10 +24,8 @@ final class SkillParseException extends ArcanaException
         public readonly ?string $filePath = null,
         ?\Throwable $previous = null,
     ) {
-        $context = $filePath !== null ? " (file: {$filePath})" : '';
-
         parent::__construct(
-            message: $message . $context,
+            message: $message,
             previous: $previous,
         );
     }

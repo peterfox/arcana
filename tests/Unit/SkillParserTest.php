@@ -202,6 +202,43 @@ final class SkillParserTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
+    // SkillParseException path isolation
+    // -------------------------------------------------------------------------
+
+    #[Test]
+    public function exception_message_does_not_contain_file_path(): void
+    {
+        try {
+            $this->parser->parseMetadataOnly('/nonexistent/path/to/SKILL.md');
+        } catch (SkillParseException $e) {
+            self::assertStringNotContainsString('/nonexistent/path', $e->getMessage());
+            self::assertSame('/nonexistent/path/to/SKILL.md', $e->filePath);
+
+            return;
+        }
+
+        self::fail('Expected SkillParseException was not thrown.');
+    }
+
+    #[Test]
+    public function parse_exception_exposes_file_path_as_property(): void
+    {
+        $path = $this->fixturePath('example/SKILL.md');
+
+        try {
+            // Pass invalid content to trigger a parse error with a known file path.
+            $this->parser->parse('no frontmatter here', $path);
+        } catch (SkillParseException $e) {
+            self::assertSame($path, $e->filePath);
+            self::assertStringNotContainsString($path, $e->getMessage());
+
+            return;
+        }
+
+        self::fail('Expected SkillParseException was not thrown.');
+    }
+
+    // -------------------------------------------------------------------------
     // Helper
     // -------------------------------------------------------------------------
 
