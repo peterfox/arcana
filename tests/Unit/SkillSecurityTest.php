@@ -146,6 +146,19 @@ final class SkillSecurityTest extends TestCase
     }
 
     #[Test]
+    public function it_throws_security_exception_for_windows_drive_letter_script_path(): void
+    {
+        $this->expectException(SecurityException::class);
+        $this->expectExceptionMessageMatches('/safety/i');
+
+        $runner = $this->makeScriptRunner();
+        $script = new SkillScript(name: 'evil', description: '', path: 'C:\\Windows\\System32\\cmd.exe', language: 'php');
+        $skillDir = realpath(__DIR__ . '/../Fixtures/skills/example') ?: '/tmp';
+
+        $runner->run($script, $skillDir);
+    }
+
+    #[Test]
     public function security_exception_message_names_the_script(): void
     {
         $runner = $this->makeScriptRunner();
