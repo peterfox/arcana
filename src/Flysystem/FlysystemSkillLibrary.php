@@ -69,6 +69,14 @@ final class FlysystemSkillLibrary implements SkillLibraryInterface
     #[\Override]
     public function listSkills(?string $filter = null): array
     {
+        if ($filter !== null && strlen($filter) > SkillLibraryInterface::MAX_FILTER_LENGTH) {
+            throw new ValidationException(sprintf(
+                'The filter string must not exceed %d bytes (got %d).',
+                SkillLibraryInterface::MAX_FILTER_LENGTH,
+                strlen($filter),
+            ));
+        }
+
         $index = $this->buildMetadataIndex();
         $skills = array_values($index);
 
