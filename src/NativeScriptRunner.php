@@ -37,7 +37,11 @@ abstract class NativeScriptRunner implements SkillScriptRunnerInterface
         $rawRelative = $script->path;
 
         // Guard 1 — reject absolute paths before any filesystem access.
-        if ($rawRelative !== '' && ($rawRelative[0] === '/' || $rawRelative[0] === '\\')) {
+        if ($rawRelative !== '' && (
+            $rawRelative[0] === '/'
+            || $rawRelative[0] === '\\'
+            || preg_match('/^[A-Za-z]:/', $rawRelative) === 1
+        )) {
             throw SecurityException::absolutePathRejected('script', $script->name, $rawRelative);
         }
 
