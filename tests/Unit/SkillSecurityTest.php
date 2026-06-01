@@ -6,11 +6,14 @@ namespace PeterFox\Arcana\Tests\Unit;
 
 use PeterFox\Arcana\Arcana;
 use PeterFox\Arcana\Exception\SecurityException;
+use PeterFox\Arcana\Exception\SkillNotFoundException;
+use PeterFox\Arcana\Exception\SkillParseException;
 use PeterFox\Arcana\Exception\ValidationException;
 use PeterFox\Arcana\NativeScriptRunner;
 use PeterFox\Arcana\Skill;
 use PeterFox\Arcana\SkillLibrary;
 use PeterFox\Arcana\SkillMetadata;
+use PeterFox\Arcana\SkillParser;
 use PeterFox\Arcana\SkillResource;
 use PeterFox\Arcana\SkillScript;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -156,6 +159,66 @@ final class SkillSecurityTest extends TestCase
             self::assertStringContainsString('my-script', $e->getMessage());
             self::assertStringContainsString('script', $e->getMessage());
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // File size limit
+    // -------------------------------------------------------------------------
+
+    #[Test]
+    public function it_rejects_oversized_skill_files_on_load(): void
+    {
+        $dir = realpath(__DIR__ . '/../Fixtures/skills')
+            ?: throw new \RuntimeException('Fixtures not found');
+
+        // Set limit below the size of the real fixture file so no temp file is needed.
+        // Oversized files are skipped during index building, so loadSkill throws
+        // SkillNotFoundException rather than SkillParseException.
+        $library = Arcana::create($dir, maxFileSizeBytes: 1);
+
+        $this->expectException(SkillNotFoundException::class);
+        $library->loadSkill('example-skill');
+    }
+
+    #[Test]
+    public function it_rejects_oversized_files_during_metadata_index_parse(): void
+    {
+        $dir = realpath(__DIR__ . '/../Fixtures/skills')
+            ?: throw new \RuntimeException('Fixtures not found');
+
+        // SkillParser::parseMetadataOnly is called during index building; oversized
+        // files should be silently skipped (same as malformed files), not crash the library.
+        $library = Arcana::create($dir, maxFileSizeBytes: 1);
+
+        // listSkills() must not throw — it skips unreadable/oversized files.
+        // The oversized fixture is skipped, so the result is an empty array.
+        self::assertSame([], $library->listSkills());
+    }
+
+    #[Test]
+    public function it_accepts_files_within_the_size_limit(): void
+    {
+        $dir = realpath(__DIR__ . '/../Fixtures/skills')
+            ?: throw new \RuntimeException('Fixtures not found');
+
+        // Default limit — fixture file should load fine.
+        $library = Arcana::create($dir);
+        $skill = $library->loadSkill('example-skill');
+
+        self::assertSame('example-skill', $skill->name());
+    }
+
+    #[Test]
+    public function parser_rejects_oversized_file_during_metadata_only_parse(): void
+    {
+        $path = realpath(__DIR__ . '/../Fixtures/skills/example/SKILL.md')
+            ?: throw new \RuntimeException('Fixture not found');
+
+        $this->expectException(SkillParseException::class);
+        $this->expectExceptionMessageMatches('/too large/i');
+
+        $parser = new SkillParser(maxFileSizeBytes: 1);
+        $parser->parseMetadataOnly($path);
     }
 
     // -------------------------------------------------------------------------
