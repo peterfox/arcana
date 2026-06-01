@@ -7,10 +7,12 @@ namespace PeterFox\Arcana\Tests\Unit;
 use PeterFox\Arcana\Arcana;
 use PeterFox\Arcana\Exception\SecurityException;
 use PeterFox\Arcana\Exception\ValidationException;
+use PeterFox\Arcana\NativeScriptRunner;
 use PeterFox\Arcana\Skill;
 use PeterFox\Arcana\SkillLibrary;
 use PeterFox\Arcana\SkillMetadata;
 use PeterFox\Arcana\SkillResource;
+use PeterFox\Arcana\SkillScript;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -21,6 +23,7 @@ use PHPUnit\Framework\TestCase;
  */
 #[CoversClass(SkillLibrary::class)]
 #[CoversClass(Skill::class)]
+#[CoversClass(NativeScriptRunner::class)]
 final class SkillSecurityTest extends TestCase
 {
     private SkillLibrary $library;
@@ -109,6 +112,53 @@ final class SkillSecurityTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
+    // Script path traversal (SecurityException via NativeScriptRunner)
+    // -------------------------------------------------------------------------
+
+    #[Test]
+    public function it_throws_security_exception_for_traversal_script_path(): void
+    {
+        $this->expectException(SecurityException::class);
+        $this->expectExceptionMessageMatches('/traversal/i');
+        $this->expectExceptionMessageMatches('/safety/i');
+
+        $runner = $this->makeScriptRunner();
+        $script = new SkillScript(name: 'evil', description: '', path: '../../../etc/passwd', language: 'php');
+        $skillDir = realpath(__DIR__ . '/../Fixtures/skills/example') ?: '/tmp';
+
+        $runner->run($script, $skillDir);
+    }
+
+    #[Test]
+    public function it_throws_security_exception_for_absolute_script_path(): void
+    {
+        $this->expectException(SecurityException::class);
+        $this->expectExceptionMessageMatches('/safety/i');
+
+        $runner = $this->makeScriptRunner();
+        $script = new SkillScript(name: 'evil', description: '', path: '/etc/passwd', language: 'php');
+        $skillDir = realpath(__DIR__ . '/../Fixtures/skills/example') ?: '/tmp';
+
+        $runner->run($script, $skillDir);
+    }
+
+    #[Test]
+    public function security_exception_message_names_the_script(): void
+    {
+        $runner = $this->makeScriptRunner();
+        $script = new SkillScript(name: 'my-script', description: '', path: '../escape.php', language: 'php');
+        $skillDir = realpath(__DIR__ . '/../Fixtures/skills/example') ?: '/tmp';
+
+        try {
+            $runner->run($script, $skillDir);
+            self::fail('Expected SecurityException was not thrown.');
+        } catch (SecurityException $e) {
+            self::assertStringContainsString('my-script', $e->getMessage());
+            self::assertStringContainsString('script', $e->getMessage());
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // Directory validation
     // -------------------------------------------------------------------------
 
@@ -134,6 +184,16 @@ final class SkillSecurityTest extends TestCase
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
+
+    private function makeScriptRunner(): NativeScriptRunner
+    {
+        return new class extends NativeScriptRunner {
+            protected function execute(SkillScript $script, string $resolvedPath): string
+            {
+                return '';
+            }
+        };
+    }
 
     private function makeSkillWithResource(string $resourcePath): Skill
     {

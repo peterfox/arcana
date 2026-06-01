@@ -6,13 +6,13 @@ namespace PeterFox\Arcana\Flysystem;
 
 use League\Flysystem\FilesystemException;
 use League\Flysystem\FilesystemOperator;
-use PeterFox\Arcana\Contract\SkillResourceLoaderInterface;
+use PeterFox\Arcana\Contract\SkillScriptRunnerInterface;
 use PeterFox\Arcana\Exception\SecurityException;
 use PeterFox\Arcana\Exception\SkillParseException;
-use PeterFox\Arcana\SkillResource;
+use PeterFox\Arcana\SkillScript;
 
 /**
- * Loads skill resource files via a Flysystem filesystem.
+ * Reads skill script files via a Flysystem filesystem and returns their contents.
  *
  * Suitable for any adapter supported by League\Flysystem — local, S3, SFTP,
  * in-memory, etc. Path traversal is blocked via string-level guards before
@@ -21,8 +21,12 @@ use PeterFox\Arcana\SkillResource;
  *
  * Note: Guard 3 (symlink escape via realpath) is not applied here because
  * Flysystem virtualises paths and does not expose symlink semantics.
+ *
+ * This runner returns the raw script content as a string. Consumers are
+ * responsible for executing it in the appropriate runtime for the script's
+ * declared language.
  */
-final class FlysystemResourceLoader implements SkillResourceLoaderInterface
+final class FlysystemScriptRunner implements SkillScriptRunnerInterface
 {
     public function __construct(
         private readonly FilesystemOperator $filesystem,
@@ -32,18 +36,18 @@ final class FlysystemResourceLoader implements SkillResourceLoaderInterface
      * {@inheritdoc}
      */
     #[\Override]
-    public function load(SkillResource $resource, string $skillDirectory): string
+    public function run(SkillScript $script, string $skillDirectory): string
     {
-        $rawRelative = $resource->path;
+        $rawRelative = $script->path;
 
         // Guard 1 — reject absolute paths.
         if ($rawRelative !== '' && ($rawRelative[0] === '/' || $rawRelative[0] === '\\')) {
-            throw SecurityException::absolutePathRejected('resource', $resource->name, $rawRelative);
+            throw SecurityException::absolutePathRejected('script', $script->name, $rawRelative);
         }
 
         // Guard 2 — reject explicit traversal sequences.
         if (str_contains($rawRelative, '..')) {
-            throw SecurityException::traversalSequenceRejected('resource', $resource->name, $rawRelative);
+            throw SecurityException::traversalSequenceRejected('script', $script->name, $rawRelative);
         }
 
         $path = rtrim($skillDirectory, '/') . '/' . $rawRelative;
@@ -52,7 +56,7 @@ final class FlysystemResourceLoader implements SkillResourceLoaderInterface
             return $this->filesystem->read($path);
         } catch (FilesystemException $e) {
             throw new SkillParseException(
-                message: 'Resource file is not readable.',
+                message: 'Script file is not readable.',
                 filePath: $path,
                 previous: $e,
             );

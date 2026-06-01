@@ -30,26 +30,18 @@ final class NativeResourceLoader implements SkillResourceLoaderInterface
 
         // Guard 1 — reject absolute paths before any filesystem access.
         if ($rawRelative !== '' && ($rawRelative[0] === '/' || $rawRelative[0] === '\\')) {
-            throw new SecurityException(
-                'Absolute resource paths are not permitted. '
-                . "Resource '{$resource->name}' declared path: '{$rawRelative}'.",
-            );
+            throw SecurityException::absolutePathRejected('resource', $resource->name, $rawRelative);
         }
 
         // Guard 2 — reject explicit traversal sequences.
         if (str_contains($rawRelative, '..')) {
-            throw new SecurityException(
-                "Path traversal sequences ('..') are not permitted in resource paths. "
-                . "Resource '{$resource->name}' declared path: '{$rawRelative}'.",
-            );
+            throw SecurityException::traversalSequenceRejected('resource', $resource->name, $rawRelative);
         }
 
         $resolvedBase = realpath($skillDirectory);
 
         if ($resolvedBase === false) {
-            throw new SecurityException(
-                "Cannot resolve skill directory: {$skillDirectory}",
-            );
+            throw SecurityException::skillDirectoryUnresolvable($skillDirectory);
         }
 
         $rawPath = $resolvedBase . DIRECTORY_SEPARATOR . $rawRelative;
@@ -65,10 +57,7 @@ final class NativeResourceLoader implements SkillResourceLoaderInterface
         // Guard 3 — final check after symlink resolution: the resolved path
         // must still be within the skill directory.
         if (!str_starts_with($resolvedPath . DIRECTORY_SEPARATOR, $resolvedBase . DIRECTORY_SEPARATOR)) {
-            throw new SecurityException(
-                "Path traversal detected: resource '{$resource->name}' resolved to '{$resolvedPath}', "
-                . "which is outside the skill directory '{$resolvedBase}'.",
-            );
+            throw SecurityException::directoryEscapeDetected('resource', $resource->name, $resolvedPath, $resolvedBase);
         }
 
         $content = file_get_contents($resolvedPath);
