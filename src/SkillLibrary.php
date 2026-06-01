@@ -250,6 +250,13 @@ final class SkillLibrary implements SkillLibraryInterface
         $files = [];
 
         try {
+            // FOLLOW_SYMLINKS is intentional: it allows symlinked skill packs
+            // (e.g. vendor directories) to be discovered. A symlinked SKILL.md
+            // that points outside the skills root poses limited risk because the
+            // parser only reads YAML frontmatter from it — it cannot cause code
+            // execution. Resource and script paths are still subject to the full
+            // three-guard containment checks in NativeResourceLoader. Operators
+            // are responsible for the ACLs on their skills directory.
             $iterator = new \RecursiveIteratorIterator(
                 new \RecursiveDirectoryIterator(
                     $dir,

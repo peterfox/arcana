@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PeterFox\Arcana;
 
 use PeterFox\Arcana\Contract\SkillResourceLoaderInterface;
+use PeterFox\Arcana\Exception\SecurityException;
 use PeterFox\Arcana\Exception\SkillParseException;
 use PeterFox\Arcana\Exception\ValidationException;
 
@@ -55,8 +56,14 @@ final class Skill
                 }
 
                 $content .= "\n\n{$resourceContent}";
-            } catch (\Throwable) {
-                // Non-fatal: skip unloadable resources
+            } catch (SecurityException $e) {
+                // A security guard fired — re-throw so the caller is aware
+                // that a path traversal violation was detected, not a routine
+                // I/O error. Swallowing this would allow probing without signal.
+                throw $e;
+            } catch (SkillParseException|ValidationException) {
+                // Non-fatal I/O or validation errors: skip the unloadable resource
+                // so a single bad resource does not prevent the skill from loading.
             }
         }
 
@@ -73,6 +80,7 @@ final class Skill
      *
      * @throws ValidationException When the resource name is unknown.
      * @throws SkillParseException When the file cannot be found or read.
+     * @throws SecurityException When the resource path attempts to escape the skill directory.
      */
     public function loadResource(string $name): string
     {
