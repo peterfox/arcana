@@ -56,11 +56,6 @@ final class Skill
                 }
 
                 $content .= "\n\n{$resourceContent}";
-            } catch (SecurityException $e) {
-                // A security guard fired — re-throw so the caller is aware
-                // that a path traversal violation was detected, not a routine
-                // I/O error. Swallowing this would allow probing without signal.
-                throw $e;
             } catch (SkillParseException|ValidationException) {
                 // Non-fatal I/O or validation errors: skip the unloadable resource
                 // so a single bad resource does not prevent the skill from loading.
