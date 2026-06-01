@@ -7,8 +7,8 @@ namespace PeterFox\Arcana\Flysystem;
 use League\Flysystem\FilesystemException;
 use League\Flysystem\FilesystemOperator;
 use PeterFox\Arcana\Contract\SkillResourceLoaderInterface;
-use PeterFox\Arcana\Exception\SecurityException;
 use PeterFox\Arcana\Exception\SkillParseException;
+use PeterFox\Arcana\Security\PathGuard;
 use PeterFox\Arcana\SkillResource;
 
 /**
@@ -34,19 +34,10 @@ final class FlysystemResourceLoader implements SkillResourceLoaderInterface
     #[\Override]
     public function load(SkillResource $resource, string $skillDirectory): string
     {
-        $rawRelative = $resource->path;
+        PathGuard::assertNotAbsolute('resource', $resource->name, $resource->path);
+        PathGuard::assertNoTraversal('resource', $resource->name, $resource->path);
 
-        // Guard 1 — reject absolute paths.
-        if ($rawRelative !== '' && ($rawRelative[0] === '/' || $rawRelative[0] === '\\')) {
-            throw SecurityException::absolutePathRejected('resource', $resource->name, $rawRelative);
-        }
-
-        // Guard 2 — reject explicit traversal sequences.
-        if (str_contains($rawRelative, '..')) {
-            throw SecurityException::traversalSequenceRejected('resource', $resource->name, $rawRelative);
-        }
-
-        $path = rtrim($skillDirectory, '/') . '/' . $rawRelative;
+        $path = rtrim($skillDirectory, '/') . '/' . $resource->path;
 
         try {
             return $this->filesystem->read($path);

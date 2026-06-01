@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace PeterFox\Arcana;
 
 use PeterFox\Arcana\Contract\SkillResourceLoaderInterface;
-use PeterFox\Arcana\Exception\SecurityException;
 use PeterFox\Arcana\Exception\SkillParseException;
+use PeterFox\Arcana\Security\PathGuard;
 
 /**
  * Loads skill resource files using native PHP filesystem calls.
@@ -26,39 +26,13 @@ final class NativeResourceLoader implements SkillResourceLoaderInterface
     #[\Override]
     public function load(SkillResource $resource, string $skillDirectory): string
     {
-        $rawRelative = $resource->path;
-
-        // Guard 1 — reject absolute paths before any filesystem access.
-        if ($rawRelative !== '' && ($rawRelative[0] === '/' || $rawRelative[0] === '\\')) {
-            throw SecurityException::absolutePathRejected('resource', $resource->name, $rawRelative);
-        }
-
-        // Guard 2 — reject explicit traversal sequences.
-        if (str_contains($rawRelative, '..')) {
-            throw SecurityException::traversalSequenceRejected('resource', $resource->name, $rawRelative);
-        }
-
-        $resolvedBase = realpath($skillDirectory);
-
-        if ($resolvedBase === false) {
-            throw SecurityException::skillDirectoryUnresolvable($skillDirectory);
-        }
-
-        $rawPath = $resolvedBase . DIRECTORY_SEPARATOR . $rawRelative;
-        $resolvedPath = realpath($rawPath);
-
-        if ($resolvedPath === false) {
-            throw new SkillParseException(
-                message: 'Resource file not found.',
-                filePath: $rawPath,
-            );
-        }
-
-        // Guard 3 — final check after symlink resolution: the resolved path
-        // must still be within the skill directory.
-        if (!str_starts_with($resolvedPath . DIRECTORY_SEPARATOR, $resolvedBase . DIRECTORY_SEPARATOR)) {
-            throw SecurityException::directoryEscapeDetected('resource', $resource->name, $resolvedPath, $resolvedBase);
-        }
+        $resolvedPath = PathGuard::resolveContained(
+            type: 'resource',
+            name: $resource->name,
+            rawRelative: $resource->path,
+            skillDirectory: $skillDirectory,
+            notFoundMessage: 'Resource file not found.',
+        );
 
         $content = file_get_contents($resolvedPath);
 
