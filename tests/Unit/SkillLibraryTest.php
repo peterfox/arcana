@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PeterFox\Arcana\Tests\Unit;
 
 use PeterFox\Arcana\Arcana;
+use PeterFox\Arcana\Contract\SkillLibraryInterface;
 use PeterFox\Arcana\Exception\SkillNotFoundException;
 use PeterFox\Arcana\Exception\ValidationException;
 use PeterFox\Arcana\Skill;
@@ -93,6 +94,24 @@ final class SkillLibraryTest extends TestCase
     public function it_returns_empty_array_when_no_skills_match_filter(): void
     {
         $results = $this->library->listSkills('zzz-nonexistent-xyz');
+
+        self::assertSame([], $results);
+    }
+
+    #[Test]
+    public function it_throws_when_filter_exceeds_max_length(): void
+    {
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessageMatches('/must not exceed/i');
+
+        $this->library->listSkills(str_repeat('a', SkillLibraryInterface::MAX_FILTER_LENGTH + 1));
+    }
+
+    #[Test]
+    public function it_accepts_a_filter_at_exactly_the_max_length(): void
+    {
+        // Should not throw — boundary value must be permitted.
+        $results = $this->library->listSkills(str_repeat('a', SkillLibraryInterface::MAX_FILTER_LENGTH));
 
         self::assertSame([], $results);
     }

@@ -19,12 +19,24 @@ use PeterFox\Arcana\SkillMetadata;
 interface SkillLibraryInterface
 {
     /**
+     * Maximum byte length permitted for the listSkills() filter string.
+     *
+     * Filter strings arrive from LLM tool-call arguments and may be
+     * arbitrarily long. This cap prevents unbounded str_contains() calls
+     * across every skill's metadata fields.
+     */
+    public const int MAX_FILTER_LENGTH = 256;
+
+    /**
      * List all available skills, optionally filtered by a search term.
      *
      * Returns lightweight metadata only — does not load skill body content.
      * Filtering matches against name, description, tags, and triggers.
      *
-     * @param string|null $filter Optional case-insensitive search term.
+     * @param string|null $filter Optional case-insensitive search term. Must be
+     *                            at most {@see self::MAX_FILTER_LENGTH} bytes.
+     *
+     * @throws ValidationException When the filter exceeds MAX_FILTER_LENGTH.
      *
      * @return array<SkillMetadata>
      */
