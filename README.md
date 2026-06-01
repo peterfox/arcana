@@ -20,7 +20,7 @@ Arcana is a lightweight, production-ready PHP library for discovering and servin
 - [Tool Calling](#tool-calling)
 - [Laravel Integration](#laravel-integration)
 - [Laravel AI Integration Guide](#laravel-ai-integration-guide)
-- [Security](#security)
+- [Security](#security) — see also [SECURITY.md](SECURITY.md)
 - [Caching](#caching)
 - [Skill Preprocessors](#skill-preprocessors)
 - [Testing](#testing)
@@ -556,30 +556,18 @@ php artisan cache:clear
 
 ## Security
 
-### Path Traversal Protection
+Arcana is designed with the assumption that a SKILL.md file could be malicious. See [SECURITY.md](SECURITY.md) for a full description of the threat model and all protections. A brief summary:
 
-All resource and script paths declared in a skill's frontmatter are validated against the skill's own directory using `realpath()`. Any path that resolves outside the skill directory throws a `SecurityException`:
+| Attack vector | Protection |
+|---|---|
+| `loadSkill('../etc/passwd')` | Skill name allowlist — `ValidationException` before any I/O |
+| Resource/script `path: /etc/passwd` | Guard 1 — absolute paths rejected before filesystem access |
+| Resource/script `path: ../../secret` | Guard 2 — `..` sequences rejected before filesystem access |
+| Symlink escaping the skill directory | Guard 3 — `realpath()` containment check after resolution |
+| YAML object deserialisation | `symfony/yaml` parsed with no unsafe flags |
+| Script execution by default | Scripts are opt-in; nothing runs without an explicit `SkillPreprocessorInterface` |
 
-```php
-// Safe — resources/overview.md is inside the skill directory
-$skill->loadResource('overview');
-
-// If a SKILL.md declared path: ../../etc/passwd, Arcana would throw:
-// PeterFox\Arcana\Exception\SecurityException
-```
-
-### Skill Name Validation
-
-Skill names are strictly validated before any filesystem access:
-- Must match `/^[a-z][a-z0-9\-]*$/`
-- Maximum 64 characters
-- No directory separators, dots, or special characters
-
-This prevents any `loadSkill('../etc/passwd')` style attacks.
-
-### Script Execution
-
-The `SkillScript` metadata is stored but **no scripts are executed** by default. Script execution is opt-in through a custom `SkillPreprocessorInterface` implementation, which you write and control entirely.
+All security violations throw `PeterFox\Arcana\Exception\SecurityException` with a descriptive message identifying the violation type and the offending path.
 
 ---
 
