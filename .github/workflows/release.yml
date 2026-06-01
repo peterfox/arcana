@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+# No workflow-level permissions — scoped to job level below.
+permissions: {}
+
+jobs:
+  release:
+    name: Build & attest release
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write      # create GitHub release
+      id-token: write      # required for artifact attestation (OIDC)
+      attestations: write  # required to write attestation records
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@7c071dfe9dc99bdf297fa79cb49ea005b9fcadbc # v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dependencies (production only)
+        run: composer install --prefer-dist --no-interaction --no-dev --no-progress
+
+      - name: Build release archive
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          ARCHIVE="arcana-${VERSION}.tar.gz"
+          tar --exclude='.git' --exclude='tests' --exclude='.github' \
+              -czf "${ARCHIVE}" .
+          echo "ARCHIVE=${ARCHIVE}" >> "$GITHUB_ENV"
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
+        with:
+          subject-path: ${{ env.ARCHIVE }}
+
+      - name: Create GitHub release
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes \
+            "${{ env.ARCHIVE }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
