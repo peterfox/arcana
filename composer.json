@@ -33,8 +33,7 @@
         "peterfox/phpunit-toon-result-printer": "^1.2",
         "phpstan/phpstan": "^2.1.51",
         "phpstan/phpstan-deprecation-rules": "^2.0.4",
-        "phpunit/phpunit": "^11.5.55",
-        "psalm/phar": "^5.26.1"
+        "phpunit/phpunit": "^11.5.55"
     },
     "suggest": {
         "laravel/ai": "Required for Laravel AI SDK tool integration",
