@@ -36,7 +36,7 @@ jobs:
       - name: Build release archive
         run: |
           VERSION="${{ github.event.inputs.version }}"
-          ARCHIVE="arcana-${VERSION}.tar.gz"
+          ARCHIVE="/tmp/arcana-${VERSION}.tar.gz"
           tar --exclude='.git' --exclude='tests' --exclude='.github' \
               -czf "${ARCHIVE}" .
           echo "ARCHIVE=${ARCHIVE}" >> "$GITHUB_ENV"
